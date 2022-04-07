@@ -22,6 +22,7 @@
 ## OTÁZKY
 - Delete má být možný? Kvůli frontě, byl by hard
 - Kolik executions pro jeden záznam? Někde se píše, že víc (filtrování), někde se píše, že se přepíše (Executor na konci)
+- Crawled data are stored as a part of the website record
 
 
 ## TECH STACK:
