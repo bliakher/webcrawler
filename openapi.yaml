@@ -1,0 +1,185 @@
+openapi: 3.0.3
+info:
+  title: WebCrawler
+  description: This is a web crawler.
+  version: 1.0.1-oas3
+servers:
+- url: /
+paths:
+  /records:
+    get:
+      summary: Get all records
+      operationId: getRecords
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json: {}
+      x-swagger-router-controller: Default
+    post:
+      summary: Create new record without values
+      operationId: createRecord
+      responses:
+        "201":
+          description: Created.
+          content:
+            text/plain: {}
+      x-swagger-router-controller: Default
+  /records/{recID}:
+    get:
+      summary: Get record by id
+      operationId: getRecord
+      parameters:
+      - name: recID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json: {}
+        "400":
+          description: Invalid ID.
+        "404":
+          description: Record not found.
+      x-swagger-router-controller: Default
+    put:
+      summary: Update record with id
+      operationId: updateRecord
+      parameters:
+      - name: recID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: new value of record
+        content:
+          application/json: {}
+      responses:
+        "200":
+          description: Updated.
+          content:
+            application/json: {}
+        "400":
+          description: Invalid ID.
+        "404":
+          description: Record not found.
+      x-swagger-router-controller: Default
+    delete:
+      summary: Delete record with id
+      operationId: deleteRecord
+      parameters:
+      - name: recID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Deleted.
+        "400":
+          description: Invalid ID.
+        "404":
+          description: Record not found.
+      x-swagger-router-controller: Default
+  /executions:
+    get:
+      summary: Get all executions
+      operationId: getExecutions
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json: {}
+      x-swagger-router-controller: Default
+    post:
+      summary: Create new execution without values
+      operationId: createExecution
+      responses:
+        "201":
+          description: Created.
+          content:
+            text/plain: {}
+      x-swagger-router-controller: Default
+  /executions/{execID}:
+    get:
+      summary: Get execution by id
+      operationId: getExecution
+      parameters:
+      - name: execID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json: {}
+        "400":
+          description: Invalid ID.
+        "404":
+          description: Execution not found.
+      x-swagger-router-controller: Default
+    put:
+      summary: Update execution with id
+      operationId: updateExecution
+      parameters:
+      - name: execID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: new value of execution
+        content:
+          application/json: {}
+      responses:
+        "200":
+          description: Updated.
+          content:
+            application/json: {}
+        "400":
+          description: Invalid ID.
+        "404":
+          description: Execution not found.
+      x-swagger-router-controller: Default
+    delete:
+      summary: Delete execution with id
+      operationId: deleteExecution
+      parameters:
+      - name: execID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Deleted.
+        "400":
+          description: Invalid ID.
+        "404":
+          description: Execution not found.
+      x-swagger-router-controller: Default
+components: {}
