@@ -26,9 +26,9 @@
 
 ## TECH STACK:
 
-FE: React
-BE: Node.js
-DTB: MySQL, webíková databáze? phpMyAdmin, MariaDB?
+- FE: React
+- BE: Node.js
+- DTB: MySQL, webíková databáze? phpMyAdmin, MariaDB?
 
 
 
