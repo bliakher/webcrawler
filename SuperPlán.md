@@ -29,8 +29,8 @@
 
 - FE: React
 - BE: Node.js
-- DTB: MySQL, webíková databáze? phpMyAdmin, MariaDB?
-
+- DTB: MySQL, webíková databáze? phpMyAdmin, MariaDB, PostgreDB?
+- TODO server (node má vlastní)
 
 
 ## DEADLINE:
