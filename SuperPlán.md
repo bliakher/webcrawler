@@ -35,6 +35,8 @@
 ## Knihovny
 
 - [vizualizace](https://www.npmjs.com/package/react-vis-network-graph)
+- [swagger](https://app.swaggerhub.com/apis/NejlepsiWebCrawler/WebCrawler/1.0.1-oas3)
+
 
 
 ## DEADLINE:
