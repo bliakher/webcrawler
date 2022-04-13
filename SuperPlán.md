@@ -23,14 +23,18 @@
 - Delete má být možný? Kvůli frontě, byl by hard
 - Kolik executions pro jeden záznam? Někde se píše, že víc (filtrování), někde se píše, že se přepíše (Executor na konci)
 - Crawled data are stored as a part of the website record
+- execution vytvoří další periodickou před nebo po? Asi před
 
 
 ## TECH STACK:
 
 - FE: React
 - BE: Node.js
-- DTB: MySQL, webíková databáze? phpMyAdmin, MariaDB?
+- DTB: MySQL
 
+## Knihovny
+
+- [vizualizace](https://www.npmjs.com/package/react-vis-network-graph)
 
 
 ## DEADLINE:
