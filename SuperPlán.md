@@ -12,14 +12,12 @@
 ## SERVER
 
 
-
 ## CRAWLER
 - třída, dostane frontu a postupně plní úkoly
-- 
-
 
 
 ## OTÁZKY
+
 - Delete má být možný? Kvůli frontě, byl by hard
 - Kolik executions pro jeden záznam? Někde se píše, že víc (filtrování), někde se píše, že se přepíše (Executor na konci)
 - Crawled data are stored as a part of the website record
@@ -36,7 +34,6 @@
 
 - [vizualizace](https://www.npmjs.com/package/react-vis-network-graph)
 - [swagger](https://app.swaggerhub.com/apis/NejlepsiWebCrawler/WebCrawler/1.0.1-oas3)
-
 
 
 ## DEADLINE:
