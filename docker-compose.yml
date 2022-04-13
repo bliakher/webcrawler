@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    command: npm run dev
+    volumes:
+      - .:/usr/app/
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://user@postgres/database
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: database
