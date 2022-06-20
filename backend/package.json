@@ -4,8 +4,9 @@
   "description": "This is a web crawler.",
   "main": "index.js",
   "scripts": {
-	"prestart": "npm install",
-	"start": "node index.js"
+    "prestart": "npm install",
+    "start": "ts-node index.js",
+    "dev": "ts-node-dev --respawn ./src/index.ts"
   },
   "keywords": [
     "swagger"
@@ -15,6 +16,11 @@
   "dependencies": {
     "connect": "^3.2.0",
     "js-yaml": "^3.3.0",
-    "oas3-tools": "^2.2.3"
+    "oas3-tools": "^2.2.3",
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "ts-node": "^10.8.1",
+    "ts-node-dev": "^2.0.0"
   }
 }
