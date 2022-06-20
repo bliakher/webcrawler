@@ -1,0 +1,481 @@
+openapi: 3.0.3
+info:
+  title: WebCrawler
+  description: This is a web crawler.
+  version: 1.0.1-oas3
+servers:
+- url: /
+paths:
+  /records:
+    get:
+      summary: Get all records
+      operationId: getRecords
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+      x-swagger-router-controller: Default
+    post:
+      summary: Create new record without values
+      operationId: createRecord
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/records_body'
+        required: true
+      responses:
+        "201":
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        "418":
+          description: Creation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+      x-swagger-router-controller: Default
+  /records/{recID}:
+    get:
+      summary: Get record by id
+      operationId: getRecord
+      parameters:
+      - name: recID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+        "400":
+          description: Invalid ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+        "404":
+          description: Record not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+      x-swagger-router-controller: Default
+    put:
+      summary: Update record with id
+      operationId: updateRecord
+      parameters:
+      - name: recID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/records_recID_body'
+        required: true
+      responses:
+        "200":
+          description: Updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        "400":
+          description: Invalid ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+        "404":
+          description: Record not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+      x-swagger-router-controller: Default
+    delete:
+      summary: Delete record with id
+      operationId: deleteRecord
+      parameters:
+      - name: recID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        "400":
+          description: Invalid ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+        "404":
+          description: Record not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+      x-swagger-router-controller: Default
+  /executions:
+    get:
+      summary: Get all executions
+      operationId: getExecutions
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_2'
+      x-swagger-router-controller: Default
+    post:
+      summary: Create new execution without values
+      operationId: createExecution
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/executions_body'
+        required: true
+      responses:
+        "201":
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        "418":
+          description: Creation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+      x-swagger-router-controller: Default
+  /executions/{execID}:
+    get:
+      summary: Get execution by id
+      operationId: getExecution
+      parameters:
+      - name: execID
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_3'
+        "400":
+          description: Invalid ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+        "404":
+          description: Execution not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_418'
+      x-swagger-router-controller: Default
+components:
+  schemas:
+    inline_response_200:
+      type: object
+      properties:
+        success:
+          type: boolean
+        records:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int64
+              url:
+                type: string
+              regEx:
+                type: string
+              periodicity:
+                type: string
+              label:
+                type: string
+              active:
+                type: boolean
+              tags:
+                type: array
+                items:
+                  type: string
+              lastExecution:
+                type: string
+              executionStatus:
+                type: integer
+                format: int64
+            example:
+              regEx: regEx
+              lastExecution: lastExecution
+              executionStatus: 6
+              periodicity: periodicity
+              active: true
+              id: 0
+              label: label
+              url: url
+              tags:
+              - tags
+              - tags
+      example:
+        records:
+        - regEx: regEx
+          lastExecution: lastExecution
+          executionStatus: 6
+          periodicity: periodicity
+          active: true
+          id: 0
+          label: label
+          url: url
+          tags:
+          - tags
+          - tags
+        - regEx: regEx
+          lastExecution: lastExecution
+          executionStatus: 6
+          periodicity: periodicity
+          active: true
+          id: 0
+          label: label
+          url: url
+          tags:
+          - tags
+          - tags
+        success: true
+    records_body:
+      required:
+      - regEx
+      type: object
+      properties:
+        url:
+          type: string
+        regEx:
+          type: string
+        periodicity:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+    inline_response_201:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      example:
+        success: true
+        message: message
+    inline_response_418:
+      type: object
+      properties:
+        success:
+          type: boolean
+        reason:
+          type: string
+    inline_response_200_1:
+      type: object
+      properties:
+        success:
+          type: boolean
+        record:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            url:
+              type: string
+            regEx:
+              type: string
+            periodicity:
+              type: string
+            label:
+              type: string
+            active:
+              type: boolean
+            tags:
+              type: array
+              items:
+                type: string
+            lastExecution:
+              type: string
+            executionStatus:
+              type: integer
+              format: int64
+          example:
+            regEx: regEx
+            lastExecution: lastExecution
+            executionStatus: 6
+            periodicity: periodicity
+            active: true
+            id: 0
+            label: label
+            url: url
+            tags:
+            - tags
+            - tags
+      example:
+        success: true
+        record:
+          regEx: regEx
+          lastExecution: lastExecution
+          executionStatus: 6
+          periodicity: periodicity
+          active: true
+          id: 0
+          label: label
+          url: url
+          tags:
+          - tags
+          - tags
+    records_recID_body:
+      required:
+      - regEx
+      type: object
+      properties:
+        url:
+          type: string
+        regEx:
+          type: string
+        periodicity:
+          type: string
+        label:
+          type: string
+        active:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+    inline_response_200_2:
+      type: object
+      properties:
+        success:
+          type: boolean
+        executions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                format: int64
+              recId:
+                type: integer
+                format: int64
+              executionStatus:
+                type: integer
+                format: int64
+              startTime:
+                type: string
+              endTime:
+                type: string
+              crawledSites:
+                type: integer
+                format: int64
+            example:
+              executionStatus: 1
+              startTime: startTime
+              id: 0
+              endTime: endTime
+              crawledSites: 5
+              recId: 6
+      example:
+        executions:
+        - executionStatus: 1
+          startTime: startTime
+          id: 0
+          endTime: endTime
+          crawledSites: 5
+          recId: 6
+        - executionStatus: 1
+          startTime: startTime
+          id: 0
+          endTime: endTime
+          crawledSites: 5
+          recId: 6
+        success: true
+    executions_body:
+      required:
+      - recordId
+      type: object
+      properties:
+        recordId:
+          type: integer
+          format: int64
+    inline_response_200_3:
+      type: object
+      properties:
+        success:
+          type: boolean
+        id:
+          type: integer
+          format: int64
+        recId:
+          type: integer
+          format: int64
+        executionStatus:
+          type: integer
+          format: int64
+        startTime:
+          type: string
+        endTime:
+          type: string
+        crawledSites:
+          type: integer
+          format: int64
+      example:
+        success: true
+        executionStatus: 1
+        startTime: startTime
+        id: 0
+        endTime: endTime
+        crawledSites: 5
+        recId: 6
