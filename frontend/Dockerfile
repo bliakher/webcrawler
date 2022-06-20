@@ -1,10 +1,10 @@
 FROM node:alpine
 
-WORKDIR /usr/src/backend
+WORKDIR /usr/src/frontend
 COPY package*.json ./
 
 RUN npm install
 COPY . .
 
-EXPOSE 8080
+EXPOSE 3000
 CMD [ "npm", "start" ]

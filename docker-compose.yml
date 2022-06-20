@@ -7,8 +7,14 @@ services:
     environment:
       DATABASE_URL: postgres://user@postgres/database
 
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+
   postgres:
-    image: postgres
+    image: postgres:alpine
     environment:
       POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: database
