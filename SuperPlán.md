@@ -28,7 +28,7 @@
 
 - FE: React
 - BE: Node.js
-- DTB: MySQL
+- DTB: Postgres
 
 ## Knihovny
 
