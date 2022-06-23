@@ -1,6 +1,6 @@
 import { stat } from 'fs';
 import React from 'react';
-import { Form, Row, Table } from 'react-bootstrap';
+import { Col, Form, Row, Table } from 'react-bootstrap';
 import { Service } from '../api/service';
 import { ExecutionData } from '../model/Execution';
 import { RecordData } from '../model/Record';
@@ -65,8 +65,9 @@ export class Executions extends React.Component<{}, ExecutionsState> {
     renderSelector() {
         if (this.records === null) return null;
         return (
-            <>
-                <h4>Filter by web record</h4>
+            <Row>
+                <Col className="col-8 col-sm-8 col-md-3 col-lg-3 col-xl-3 col-xxl-3 m-2 p-2">
+                <h6>Filter by web record</h6>
                 <Form.Select onChange={this.handleSelectorChange}>
                     <option>Select web record</option>
                     { this.records.map(record => (
@@ -75,7 +76,8 @@ export class Executions extends React.Component<{}, ExecutionsState> {
                         </option>
                     )) }
                 </Form.Select>
-            </>
+                </Col>
+            </Row>
         );
     }
 
