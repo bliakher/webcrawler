@@ -37,6 +37,21 @@ export class RecordData {
         var found = records?.filter(record => record.id === recordId) ?? [];
         return found.length > 0 ? found[0] : null;
     }
+
+    static createEmptyRecord(recordId: number): RecordData {
+        //TODO: ??? how is created in the database
+        return new RecordData({
+            id: recordId,
+            url: "",
+            label: "",
+            regEx: "",
+            periodicity: 0,
+            active: false, 
+            tags: [],
+            lastExecTime: "",
+            lastExecStatus: 0
+        })
+    }
 }
 
 export interface RecordEditable {

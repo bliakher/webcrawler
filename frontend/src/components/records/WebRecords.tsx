@@ -9,6 +9,8 @@ import { Loader } from '../Loader';
 import { RecordTable } from './RecordsTable';
 import { EditModal } from './EditModal';
 
+// TODO: trigger page reload on edit dialog save
+// TODO: if edit of new record is cancelled, delete record
 
 interface WebRecordsStatus {
     loaded: boolean;
@@ -20,6 +22,7 @@ interface WebRecordsStatus {
     checkedRecords: Set<number>;
     visualizationDisplayed: boolean;
     showEdit: boolean;
+    isNew: boolean;
     editedRecord: RecordData | null;
 }
 export class WebRecords extends React.Component<{}, WebRecordsStatus> {
@@ -38,6 +41,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             checkedRecords: new Set(),
             visualizationDisplayed: false,
             showEdit: false,
+            isNew: false,
             editedRecord: null
         };
         this.handleFilterOn = this.handleFilterOn.bind(this);
@@ -48,10 +52,12 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleSortByUrl = this.handleSortByUrl.bind(this);
         this.handleSortByTime = this.handleSortByTime.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
+        this.handleEditClose = this.handleEditClose.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
         this.handleRowCheck = this.handleRowCheck.bind(this);
         this.handleVisualize = this.handleVisualize.bind(this);
+        this.handleNew = this.handleNew.bind(this);
     }
     async componentDidMount() {
         this.records = await Service.getRecords();
@@ -78,8 +84,16 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         if (!record) return;
         this.setState({showEdit: true, editedRecord: record});
     }
+    handleEditClose() {
+        this.setState({showEdit: false, editedRecord: null, isNew: false});
+    }
     handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
+    }
+    async handleNew() {
+        var newRecord = await Service.createRecord();
+        if (!newRecord) return;
+        this.setState({showEdit: true, editedRecord: newRecord, isNew: true});
     }
     handlePageChange(pageNumber: number) { this.setState({curPage: pageNumber}); }
     handleRowCheck(recordId: number) {
@@ -89,6 +103,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.setState({checkedRecords: checked});
     }
     handleVisualize() { this.setState({visualizationDisplayed: !this.state.visualizationDisplayed}); }
+
 
     renderHeader() {
         return (
@@ -184,10 +199,6 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         );
     }
 
-    renderEditModal(record: RecordData) {
-
-    }
-
     render() {
         if (this.state.loaded && this.records) {
             var records = this.records ? this.records : [];
@@ -210,15 +221,22 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                     <RecordTable records={recordsSliced} editCallback={this.handleEdit} deleteCallback={this.handleDelete}
                                 checkCallback={this.handleRowCheck}/>
                     <Row className="justify-content-md-center text-center">
-                        <MyPagination currentPage={this.state.curPage} totalCount={records.length} pageSize={this.PAGE_SIZE}
-                            onPageChange={this.handlePageChange} siblingCount={1} />
+                        <Col className="m-2">
+                            <MyPagination currentPage={this.state.curPage} totalCount={records.length} pageSize={this.PAGE_SIZE}
+                                onPageChange={this.handlePageChange} siblingCount={1} />
+                        </Col>
+                        <Col className="m-2">
+                            <Button className="m-2" onClick={this.handleNew}>
+                                New record
+                            </Button>
+                        </Col>
                     </Row>
                     
                     { this.renderVisualization() }
 
                     { this.state.showEdit && this.state.editedRecord &&
-                        <EditModal initialRecord={this.state.editedRecord} 
-                            onCloseCallback={() => this.setState({showEdit: false, editedRecord: null})} /> }
+                        <EditModal initialRecord={this.state.editedRecord} text={this.state.isNew ? "New record" : "Edit record"}
+                            onCloseCallback={this.handleEditClose} /> }
                     
                 </>
             );

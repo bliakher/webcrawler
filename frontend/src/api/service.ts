@@ -10,6 +10,7 @@ export interface APIResponse<T> {
 }
 
 var records = testRecords.map(dataObj => new RecordData(dataObj));
+var counter = 7;
 
 export class Service {
 
@@ -36,8 +37,21 @@ export class Service {
         return this.getTestRecordData();
     }
 
+    // returns new record id
+    static async createRecord(): Promise<RecordData | null> {
+        return this.testCreate();
+    }
+
     static async updateRecord(recordId: number, recordData: RecordEditable): Promise<void> {
         return this.testUpdate(recordId, recordData);
+    }
+
+    private static testCreate(): RecordData {
+        var recordId = counter++;
+        var record = RecordData.createEmptyRecord(recordId);
+        records.push(record);
+        return record;
+
     }
 
     private static testUpdate(recordId: number, recordData: RecordEditable) {

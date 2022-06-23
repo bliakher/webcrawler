@@ -7,6 +7,7 @@ import { PeriodicitySelector } from "./PeriodicitySelector";
 interface EditModalProps {
     initialRecord: RecordData;
     onCloseCallback: () => void;
+    text: string;
 }
 
 interface EditModalState {
@@ -69,7 +70,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
         return (
             <Modal onHide={this.props.onCloseCallback} show={true}>
                 <Modal.Header closeButton>
-                <Modal.Title>Edit record</Modal.Title>
+                <Modal.Title>{this.props.text}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Row onChange={this.handleTextChange}>
