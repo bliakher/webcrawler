@@ -12,6 +12,15 @@ export interface IRecord {
 
 }
 
+export interface IRecordUpdate {
+    url: string;
+    regEx: string;
+    periodicity: number;
+    label: string;
+    active: boolean;
+    tags: string[];
+}
+
 export interface IExecution {
     id: number;
     recId: number;

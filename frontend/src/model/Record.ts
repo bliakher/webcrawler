@@ -33,6 +33,19 @@ export class RecordData {
         if (rec1.lastExecTime > rec2.lastExecTime) return 1;
         return -1;
     }
+    static getRecordFrom(recordId: number, records: RecordData[]): RecordData | null {
+        var found = records?.filter(record => record.id === recordId) ?? [];
+        return found.length > 0 ? found[0] : null;
+    }
+}
+
+export interface RecordEditable {
+    url: string;
+    regEx: string;
+    periodicity: Periodicity;
+    label: string;
+    active: boolean;
+    tags: string[];
 }
 
 export class Periodicity {

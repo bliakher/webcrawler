@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
 import { Layout } from './components/Layout';
 import { Executions } from './components/Executions';
-import { WebRecords } from './components/WebRecords';
+import { WebRecords } from './components/records/WebRecords';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 

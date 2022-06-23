@@ -1,13 +1,13 @@
 import React from 'react';
 import { Row, Table, Form, Button, Col } from 'react-bootstrap';
-import { ExecutionData } from '../model/Execution';
-import { RecordData } from '../model/Record';
-import { MyPagination } from './Pagination';
-import { GraphVisualization } from './GraphVisualization';
-import { ImBin as DeleteIcon } from 'react-icons/im';
-import { FiEdit as EditIcon } from 'react-icons/fi';
-import { Service } from '../api/service';
-import { Loader } from './Loader';
+import { ExecutionData } from '../../model/Execution';
+import { RecordData } from '../../model/Record';
+import { MyPagination } from '../Pagination';
+import { GraphVisualization } from '../GraphVisualization';
+import { Service } from '../../api/service';
+import { Loader } from '../Loader';
+import { RecordTable } from './RecordsTable';
+import { EditModal } from './EditModal';
 
 
 interface WebRecordsStatus {
@@ -18,8 +18,9 @@ interface WebRecordsStatus {
     sortBy: { url: boolean, time: boolean };
     curPage: number;
     checkedRecords: Set<number>;
-
     visualizationDisplayed: boolean;
+    showEdit: boolean;
+    editedRecord: RecordData | null;
 }
 export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     PAGE_SIZE = 2;
@@ -35,7 +36,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             sortBy: { url: false, time: false },
             curPage: 1,
             checkedRecords: new Set(),
-            visualizationDisplayed: false
+            visualizationDisplayed: false,
+            showEdit: false,
+            editedRecord: null
         };
         this.handleFilterOn = this.handleFilterOn.bind(this);
         this.handleFilterOff = this.handleFilterOff.bind(this);
@@ -71,6 +74,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     handleSortByTime() { this.setState({sortBy: {time : !this.state.sortBy.time, url: this.state.sortBy.url}}); }
     handleEdit(recordId: number) {
         console.log("edit rec: ", recordId);
+        var record = RecordData.getRecordFrom(recordId, this.records ? this.records : []);
+        if (!record) return;
+        this.setState({showEdit: true, editedRecord: record});
     }
     handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
@@ -177,6 +183,11 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             button
         );
     }
+
+    renderEditModal(record: RecordData) {
+
+    }
+
     render() {
         if (this.state.loaded && this.records) {
             var records = this.records ? this.records : [];
@@ -204,6 +215,10 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                     </Row>
                     
                     { this.renderVisualization() }
+
+                    { this.state.showEdit && this.state.editedRecord &&
+                        <EditModal initialRecord={this.state.editedRecord} 
+                            onCloseCallback={() => this.setState({showEdit: false, editedRecord: null})} /> }
                     
                 </>
             );
@@ -225,71 +240,5 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
 }
 
-interface RecordTableProps {
-    records: RecordData[];
-    editCallback: (recordId: number) => void;
-    deleteCallback: (recordId: number) => void;
-    checkCallback: (recordId: number) => void;
-}
 
-class RecordTable extends React.Component<RecordTableProps> {
-    constructor(props: RecordTableProps) {
-        super(props);
-    }
-    render() {
-        return (
-            <Table striped bordered hover >
-                    <thead>
-                        <tr>
-                            <th>Label</th>
-                            <th>URL</th>
-                            <th>Periodicity (days-hours-minutes)</th>
-                            <th>Tags</th>
-                            <th>Last execution time</th>
-                            <th>Last execution status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { this.props.records.map(record => (
-                            <RecordRow key={record.id} record={record} 
-                                editCallback={() => this.props.editCallback(record.id)}
-                                deleteCallback={() => this.props.deleteCallback(record.id)}
-                                checkCallback={() => this.props.checkCallback(record.id)} />)) }
-                    </tbody>
-            </Table>
-        );
-    }
-}
 
-interface RecordRowProps {
-    record: RecordData;
-    editCallback: () => void;
-    deleteCallback: () => void;
-    checkCallback: () => void;
-}
-
-const RecordRow = (props: RecordRowProps) => {
-    const record = props.record;
-    return (
-        <tr key={record.id}>
-            <td>{record.label}</td>
-            <td>{record.url }</td>
-            <td>{record.periodicity.toString()}</td>
-            <td>
-                {record.tags.map(tag => (<div key={tag}>{tag}</div>))}
-            </td>
-            <td>{record.lastExecTime.toISOString()}</td>
-            <td>{ExecutionData.getStatusString(record.lastExecStatus)}</td>
-            <td>
-                <Button onClick={props.editCallback} variant="warning" className="m-1">
-                    <EditIcon />
-                </Button>
-                <Button onClick={props.deleteCallback} variant="danger" className="m-1">
-                    <DeleteIcon />
-                </Button>
-                <Form.Check type="checkbox" onChange={props.checkCallback}/>
-            </td>
-        </tr>
-    );
-}
