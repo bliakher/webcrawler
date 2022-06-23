@@ -1,4 +1,4 @@
-
+import { IExecution } from "../api/model";
 
 export enum ExecutionStatus {
     Waiting,
@@ -8,6 +8,19 @@ export enum ExecutionStatus {
 }
 
 export class Execution {
+    id: number;
+    recordId: number;
+    status: ExecutionStatus;
+    startTime: Date | null;
+    endTime: Date | null;
+
+    constructor(execObj: IExecution) {
+        this.id = execObj.id;
+        this.recordId = execObj.recId;
+        this.status = Execution.getStatus(execObj.executionStatus);
+        this.startTime = execObj.startTime ? new Date(execObj.startTime) : null;
+        this.endTime = execObj.endTime ? new Date(execObj.endTime) : null;
+    }
 
     static getStatus(statusCode: number): ExecutionStatus {
         switch(statusCode) {
