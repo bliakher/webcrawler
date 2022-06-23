@@ -4,7 +4,7 @@ export const testData: IRecord[] = [
     {
         id: 5,
         label: "E",
-        url: "http",
+        url: "httpa",
         tags: ["tag1", "tag2"],
         regEx: "*",
         periodicity: 1800,
@@ -15,7 +15,7 @@ export const testData: IRecord[] = [
     {
         id: 1,
         label: "A",
-        url: "http",
+        url: "httpb",
         tags: ["tag1", "tag2"],
         regEx: "*",
         periodicity: 90,
@@ -26,7 +26,7 @@ export const testData: IRecord[] = [
     {
         id: 3,
         label: "C",
-        url: "http",
+        url: "httpc",
         tags: ["tag2"],
         regEx: "*",
         periodicity: 120,
@@ -37,7 +37,7 @@ export const testData: IRecord[] = [
     {
         id: 2,
         label: "B",
-        url: "http",
+        url: "httpd",
         tags: ["tag1"],
         regEx: "*",
         periodicity: 90,
@@ -49,7 +49,7 @@ export const testData: IRecord[] = [
     {
         id: 6,
         label: "F",
-        url: "http",
+        url: "httpe",
         tags: ["tag1"],
         regEx: "*",
         periodicity: 90,
@@ -60,7 +60,7 @@ export const testData: IRecord[] = [
     {
         id: 4,
         label: "D",
-        url: "http",
+        url: "httpf",
         tags: [],
         regEx: "*",
         periodicity: 90,

@@ -3,6 +3,7 @@ import { Row, Table, Form, Button, Col } from 'react-bootstrap';
 import { Execution } from '../model/Execution';
 import { RecordData } from '../model/Record';
 import { MyPagination } from './Pagination';
+import { GraphVisualization } from './GraphVisualization';
 import { ImBin as DeleteIcon } from 'react-icons/im';
 import { FiEdit as EditIcon } from 'react-icons/fi';
 import { Service } from '../api/service';
@@ -15,7 +16,9 @@ interface WebRecordsStatus {
     filterBy: { url: string, label: string, tags: string };
     sortBy: { url: boolean, time: boolean };
     curPage: number;
+    checkedRecords: Set<number>;
 
+    visualizationDisplayed: boolean;
 }
 export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     PAGE_SIZE = 2;
@@ -29,7 +32,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             filterOn: false,
             filterBy: { url: "", label: "", tags: "" },
             sortBy: { url: false, time: false },
-            curPage: 1
+            curPage: 1,
+            checkedRecords: new Set(),
+            visualizationDisplayed: false
         };
         this.handleFilterOn = this.handleFilterOn.bind(this);
         this.handleFilterOff = this.handleFilterOff.bind(this);
@@ -41,6 +46,8 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
+        this.handleRowCheck = this.handleRowCheck.bind(this);
+        this.handleVisualize = this.handleVisualize.bind(this);
     }
     async componentDidMount() {
         this.records = await Service.getRecords();
@@ -67,9 +74,14 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
     }
-    handlePageChange(pageNumber: number) {
-        this.setState({curPage: pageNumber});
+    handlePageChange(pageNumber: number) { this.setState({curPage: pageNumber}); }
+    handleRowCheck(recordId: number) {
+        var checked = this.state.checkedRecords;
+        if (checked.has(recordId)) checked.delete(recordId);
+        else checked.add(recordId);
+        this.setState({checkedRecords: checked});
     }
+    handleVisualize() { this.setState({visualizationDisplayed: !this.state.visualizationDisplayed}); }
 
     renderHeader() {
         return (
@@ -144,6 +156,26 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             </div>
         );
     }
+
+    renderVisualization() {
+        if (this.state.checkedRecords.size === 0) return null;
+        var button = (
+            <Button onClick={this.handleVisualize}>
+                {this.state.visualizationDisplayed ? "Hide visualization" : "Display visualization" }
+            </Button>
+        );
+        if (this.state.visualizationDisplayed) {
+            return (
+                <>
+                    { button }
+                    <GraphVisualization records={Array.from(this.state.checkedRecords.values())} />
+                </>
+            );
+        }
+        return (
+            button
+        );
+    }
     render() {
         if (this.state.loaded && this.records) {
             var records = this.records ? this.records : [];
@@ -163,11 +195,15 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                             { this.renderSortForm() }
                         </Col>
                     </Row>
-                    <RecordTable records={recordsSliced} editCallback={this.handleEdit} deleteCalback={this.handleDelete}/>
+                    <RecordTable records={recordsSliced} editCallback={this.handleEdit} deleteCallback={this.handleDelete}
+                                checkCallback={this.handleRowCheck}/>
                     <Row className="justify-content-md-center text-center">
                         <MyPagination currentPage={this.state.curPage} totalCount={records.length} pageSize={this.PAGE_SIZE}
                             onPageChange={this.handlePageChange} siblingCount={1} />
                     </Row>
+                    
+                    { this.renderVisualization() }
+                    
                 </>
             );
         } else if (this.state.loaded && this.state.error) {
@@ -191,7 +227,8 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
 interface RecordTableProps {
     records: RecordData[];
     editCallback: (recordId: number) => void;
-    deleteCalback: (recordId: number) => void;
+    deleteCallback: (recordId: number) => void;
+    checkCallback: (recordId: number) => void;
 }
 
 class RecordTable extends React.Component<RecordTableProps> {
@@ -216,7 +253,8 @@ class RecordTable extends React.Component<RecordTableProps> {
                         { this.props.records.map(record => (
                             <RecordRow key={record.id} record={record} 
                                 editCallback={() => this.props.editCallback(record.id)}
-                                deleteCalback={() => this.props.deleteCalback(record.id)}/>)) }
+                                deleteCallback={() => this.props.deleteCallback(record.id)}
+                                checkCallback={() => this.props.checkCallback(record.id)} />)) }
                     </tbody>
             </Table>
         );
@@ -226,7 +264,8 @@ class RecordTable extends React.Component<RecordTableProps> {
 interface RecordRowProps {
     record: RecordData;
     editCallback: () => void;
-    deleteCalback: () => void;
+    deleteCallback: () => void;
+    checkCallback: () => void;
 }
 
 const RecordRow = (props: RecordRowProps) => {
@@ -245,9 +284,10 @@ const RecordRow = (props: RecordRowProps) => {
                 <Button onClick={props.editCallback} variant="warning" className="m-1">
                     <EditIcon />
                 </Button>
-                <Button onClick={props.deleteCalback} variant="danger" className="m-1">
+                <Button onClick={props.deleteCallback} variant="danger" className="m-1">
                     <DeleteIcon />
                 </Button>
+                <Form.Check type="checkbox" onChange={props.checkCallback}/>
             </td>
         </tr>
     );
