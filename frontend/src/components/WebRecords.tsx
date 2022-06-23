@@ -2,6 +2,7 @@ import React from 'react';
 import { Row, Table, Form, Button, Col } from 'react-bootstrap';
 import { Execution } from '../model/Execution';
 import { RecordData } from '../model/Record';
+import { MyPagination } from './Pagination';
 import { ImBin as DeleteIcon } from 'react-icons/im';
 import { FiEdit as EditIcon } from 'react-icons/fi';
 
@@ -14,8 +15,10 @@ interface WebRecordsStatus {
     filterOn: boolean;
     filterBy: { url: string, label: string, tags: string };
     sortBy: { url: boolean, time: boolean };
+    curPage: number;
 }
 export class WebRecords extends React.Component<{}, WebRecordsStatus> {
+    PAGE_SIZE = 2;
     records: RecordData[] | null;
     constructor(props: any) {
         super(props);
@@ -25,6 +28,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             filterOn: false,
             filterBy: { url: "", label: "", tags: "" },
             sortBy: { url: false, time: false },
+            curPage: 1
         };
         this.handleFilterOn = this.handleFilterOn.bind(this);
         this.handleFilterOff = this.handleFilterOff.bind(this);
@@ -35,6 +39,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleSortByTime = this.handleSortByTime.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+        this.handlePageChange = this.handlePageChange.bind(this);
     }
     componentDidMount() {
         this.records = testData.map(dataObj => new RecordData(dataObj));
@@ -59,6 +64,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
+    }
+    handlePageChange(pageNumber: number) {
+        this.setState({curPage: pageNumber});
     }
 
     renderHeader() {
@@ -139,6 +147,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             var records = this.records ? this.records : [];
             if (this.state.filterOn) records = this.filterRecords(records); // filter
             records = this.sortRecords(records); // sort
+            const firstPageIndex = (this.state.curPage - 1) * this.PAGE_SIZE;
+            const lastPageIndex = firstPageIndex + this.PAGE_SIZE;
+            var recordsSliced = records.slice(firstPageIndex, lastPageIndex);
             return (
                 <>
                     { this.renderHeader() }
@@ -150,7 +161,11 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                             { this.renderSortForm() }
                         </Col>
                     </Row>
-                    <RecordTable records={records} editCallback={this.handleEdit} deleteCalback={this.handleDelete}/>
+                    <RecordTable records={recordsSliced} editCallback={this.handleEdit} deleteCalback={this.handleDelete}/>
+                    <Row className="justify-content-md-center text-center">
+                        <MyPagination currentPage={this.state.curPage} totalCount={records.length} pageSize={this.PAGE_SIZE}
+                            onPageChange={this.handlePageChange} siblingCount={1} />
+                    </Row>
                 </>
             );
         } else {
