@@ -1,12 +1,13 @@
 import React from 'react';
 import { Row, Table, Form, Button, Col } from 'react-bootstrap';
-import { Execution } from '../model/Execution';
+import { ExecutionData } from '../model/Execution';
 import { RecordData } from '../model/Record';
 import { MyPagination } from './Pagination';
 import { GraphVisualization } from './GraphVisualization';
 import { ImBin as DeleteIcon } from 'react-icons/im';
 import { FiEdit as EditIcon } from 'react-icons/fi';
 import { Service } from '../api/service';
+import { Loader } from './Loader';
 
 
 interface WebRecordsStatus {
@@ -57,7 +58,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
 
     handleFilterOn(event: any) { 
         event.preventDefault();
-        this.setState({filterOn: true}); console.log("filter on"); }
+        this.setState({filterOn: true, curPage: 1}); console.log("filter on"); }
     handleFilterOff() { this.setState({filterOn: false}); console.log("filter off"); }
     handleChangeFilterUrl(event: any) { this.setState({filterBy: {url: event.target.value, 
         label: this.state.filterBy.label, tags: this.state.filterBy.tags}})}
@@ -217,7 +218,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         return (
             <>
                 { this.renderHeader() }
-                <p>Loading...</p>
+                <Loader />
             </>
         );
         
@@ -279,7 +280,7 @@ const RecordRow = (props: RecordRowProps) => {
                 {record.tags.map(tag => (<div key={tag}>{tag}</div>))}
             </td>
             <td>{record.lastExecTime.toISOString()}</td>
-            <td>{Execution.getStatusString(record.lastExecStatus)}</td>
+            <td>{ExecutionData.getStatusString(record.lastExecStatus)}</td>
             <td>
                 <Button onClick={props.editCallback} variant="warning" className="m-1">
                     <EditIcon />
