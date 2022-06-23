@@ -52,7 +52,7 @@ export const MyPagination = (props: {
         // Render our Page Pills
         return (
 
-            <Pagination.Item active={props.currentPage === pageNumber} 
+            <Pagination.Item active={props.currentPage === pageNumber} key={pageNumber}
                 onClick={typeof pageNumber == "number" ? () => props.onPageChange(pageNumber) : () => {}}>
                 {pageNumber}
             </Pagination.Item>
