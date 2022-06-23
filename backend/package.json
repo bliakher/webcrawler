@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prestart": "npm install",
-    "start": "ts-node index.js",
-    "dev": "ts-node-dev --respawn ./src/index.ts"
+    "start": "node index.js"
   },
   "keywords": [
     "swagger"
@@ -14,6 +13,8 @@
   "license": "Unlicense",
   "private": true,
   "dependencies": {
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.11",
     "connect": "^3.2.0",
     "js-yaml": "^3.3.0",
     "oas3-tools": "^2.2.3",
