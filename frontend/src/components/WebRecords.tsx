@@ -5,17 +5,17 @@ import { RecordData } from '../model/Record';
 import { MyPagination } from './Pagination';
 import { ImBin as DeleteIcon } from 'react-icons/im';
 import { FiEdit as EditIcon } from 'react-icons/fi';
+import { Service } from '../api/service';
 
-import { testData } from '../api/testData';
-import { stat } from 'fs/promises';
-import { url } from 'inspector';
 
 interface WebRecordsStatus {
     loaded: boolean;
+    error: boolean;
     filterOn: boolean;
     filterBy: { url: string, label: string, tags: string };
     sortBy: { url: boolean, time: boolean };
     curPage: number;
+
 }
 export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     PAGE_SIZE = 2;
@@ -25,6 +25,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.records = null;
         this.state = { 
             loaded: false,
+            error: false,
             filterOn: false,
             filterBy: { url: "", label: "", tags: "" },
             sortBy: { url: false, time: false },
@@ -41,9 +42,10 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleDelete = this.handleDelete.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
     }
-    componentDidMount() {
-        this.records = testData.map(dataObj => new RecordData(dataObj));
-        this.setState({loaded: true});
+    async componentDidMount() {
+        this.records = await Service.getRecords();
+        var error = this.records === null;
+        this.setState({loaded: true, error: error});
     }
 
     handleFilterOn(event: any) { 
@@ -168,14 +170,20 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                     </Row>
                 </>
             );
-        } else {
+        } else if (this.state.loaded && this.state.error) {
             return (
                 <>
                     { this.renderHeader() }
-                    <p>Loading...</p>
+                    <p>Error</p>
                 </>
             );
-        }
+        } 
+        return (
+            <>
+                { this.renderHeader() }
+                <p>Loading...</p>
+            </>
+        );
         
     }
 }
