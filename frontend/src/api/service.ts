@@ -1,6 +1,8 @@
+import { ExecutionData } from '../model/Execution';
 import { RecordData } from '../model/Record';
 import { IRecord, IExecution } from './model';
-import { testData } from './testData';
+import { testRecords } from './testRecords';
+import { testExecutions } from './testExecutions';
 
 export interface APIResponse<T> {
     success: boolean;
@@ -34,6 +36,14 @@ export class Service {
     }
 
     private static getTestRecordData(): RecordData[] {
-        return testData.map(dataObj => new RecordData(dataObj));
+        return testRecords.map(dataObj => new RecordData(dataObj));
+    }
+
+    static async getExecutions(): Promise<ExecutionData[] | null> {
+        return this.getTestExecutionData();
+    }
+
+    private static getTestExecutionData(): ExecutionData[] {
+        return testExecutions.map(exec => new ExecutionData(exec));
     }
 }

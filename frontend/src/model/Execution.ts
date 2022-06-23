@@ -1,3 +1,4 @@
+import { updateExternalModuleReference } from "typescript";
 import { IExecution } from "../api/model";
 
 export enum ExecutionStatus {
@@ -7,19 +8,21 @@ export enum ExecutionStatus {
     Error
 }
 
-export class Execution {
+export class ExecutionData {
     id: number;
     recordId: number;
     status: ExecutionStatus;
     startTime: Date | null;
     endTime: Date | null;
+    crawledSites: number;
 
     constructor(execObj: IExecution) {
         this.id = execObj.id;
         this.recordId = execObj.recId;
-        this.status = Execution.getStatus(execObj.executionStatus);
+        this.status = ExecutionData.getStatus(execObj.executionStatus);
         this.startTime = execObj.startTime ? new Date(execObj.startTime) : null;
         this.endTime = execObj.endTime ? new Date(execObj.endTime) : null;
+        this.crawledSites = execObj.crawledSites;
     }
 
     static getStatus(statusCode: number): ExecutionStatus {

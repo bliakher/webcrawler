@@ -1,5 +1,5 @@
 import { IRecord } from '../api/model'; 
-import { ExecutionStatus, Execution } from './Execution';
+import { ExecutionStatus, ExecutionData } from './Execution';
 
 export class RecordData {
 
@@ -21,7 +21,7 @@ export class RecordData {
         this.active = recordObj.active;
         this.tags = recordObj.tags;
         this.lastExecTime = new Date(recordObj.lastExecTime);
-        this.lastExecStatus = Execution.getStatus(recordObj.lastExecStatus);
+        this.lastExecStatus = ExecutionData.getStatus(recordObj.lastExecStatus);
     }
 
     static compareByUrl(rec1: RecordData, rec2: RecordData) {

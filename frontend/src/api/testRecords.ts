@@ -1,6 +1,6 @@
-import { IRecord } from '../api/model';
+import { IRecord } from './model';
 
-export const testData: IRecord[] = [
+export const testRecords: IRecord[] = [
     {
         id: 5,
         label: "E",
