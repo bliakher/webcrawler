@@ -1,13 +1,25 @@
-import { Liquibase, LiquibaseConfig, POSTGRESQL_DEFAULT_CONFIG } from 'liquibase';
+import { Client } from 'pg';
 
-const myConfig: LiquibaseConfig = {
-  ...POSTGRESQL_DEFAULT_CONFIG,
-  changeLogFile: './changelog.xml',
-  url: 'jdbc:postgresql://localhost:5432/node_liquibase_testing',
-  username: 'yourusername',
-  password: 'yoursecurepassword',
-  liquibase: 'Users/me/absolute/path/to/executable/directory'
+export class DatabaseManager {
+
+	private client : Client; 
+
+	constructor() {
+		let conStr = process.env.DATABASE_URL;
+		console.log(conStr);
+		this.client = new Client({connectionString : conStr});
+		this.client.connect();
+		this.getTestData();
+	}
+
+	private async getTestData() {
+		this.client.query('SELECT * FROM test_table', (err, res) => {
+			if (err) {
+			  console.log(err.stack)
+			} else {
+			  console.log(res.rows)
+			}
+			this.client.end();
+		  });	
+	}
 }
-const inst = new Liquibase(myConfig);
-
-inst.status();
