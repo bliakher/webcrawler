@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="-1" author="loupers">
         <createTable tableName="test_table">
-            <column name="id" autoIncrement="true" startWith="1"
-                    type="BIGINT">
-                <constraints primaryKey="true"/>
+            <column name="id" autoIncrement="true" startWith="1" type="BIGINT">
+                <constraints primaryKey="true" />
             </column>
             <column name="name" type="VARCHAR(50)"></column>
         </createTable>
@@ -22,5 +17,48 @@
         <insert tableName="test_table">
             <column name="name" value="A"></column>
         </insert>
+    </changeSet>
+
+    <changeSet id="0" author="jp">
+        <createTable tableName="webpage">
+            <column name="id" autoIncrement="true" startWith="1" type="BIGINT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="url" type="VARCHAR(250)"></column>
+            <column name="regex" type="VARCHAR(250)"></column>
+            <column name="periodicity" type="INTEGER"></column>
+            <column name="label" type="VARCHAR(250)"></column>
+            <column name="active" type="BOOLEAN" defaultValue="true"></column>
+        </createTable>
+
+        <createTable tableName="tags">
+            <column name="webpage_id" type="BIGINT">
+                <constraints foreignKeyName="record_tag_fk" referencedTableName="webpage" referencedColumnNames="id" />
+            </column>
+            <column name="value" type="VARCHAR(250)"></column>
+        </createTable>
+
+        <createTable tableName="nodes">
+            <column name="id" autoIncrement="true" startWith="1" type="BIGINT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="url" type="VARCHAR(250)"></column>
+            <column name="crawl_time" type="INTEGER"></column>
+            <column name="title" type="VARCHAR(250)"></column>
+            <column name="webpage_id" type="BIGINT">
+                <constraints foreignKeyName="owner_record_fk" referencedTableName="webpage" referencedColumnNames="id" />
+            </column>
+        </createTable>
+
+        <createTable tableName="nodeLinks">
+            <column name="node_id_from" type="BIGINT">
+                <constraints foreignKeyName="from_node_fk" referencedTableName="nodes" referencedColumnNames="id" />
+            </column>
+            <column name="node_id_to" type="BIGINT">
+                <constraints foreignKeyName="to_node_fk" referencedTableName="nodes" referencedColumnNames="id" />
+            </column>
+        </createTable>
+
+
     </changeSet>
 </databaseChangeLog>

@@ -1,25 +1,36 @@
-import { Client } from 'pg';
+import { Pool } from 'pg';
 
 export class DatabaseManager {
 
-	private client : Client; 
+	private static instance : DatabaseManager = null;
 
-	constructor() {
+	private pool : Pool; 
+
+	private constructor() {
 		let conStr = process.env.DATABASE_URL;
 		console.log(conStr);
-		this.client = new Client({connectionString : conStr});
-		this.client.connect();
+		this.pool = new Pool({connectionString : conStr});
+		this.pool.connect();
+
 		this.getTestData();
 	}
 
+	public static getManager() : DatabaseManager {
+		if (!DatabaseManager.instance) {
+			DatabaseManager.instance = new DatabaseManager();
+		}
+		return DatabaseManager.instance;
+	}
+
+
 	private async getTestData() {
-		this.client.query('SELECT * FROM test_table', (err, res) => {
+		this.pool.query('SELECT * FROM test_table', (err, res) => {
 			if (err) {
 			  console.log(err.stack)
 			} else {
 			  console.log(res.rows)
 			}
-			this.client.end();
 		  });	
 	}
+
 }
