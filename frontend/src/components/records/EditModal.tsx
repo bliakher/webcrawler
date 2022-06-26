@@ -7,6 +7,7 @@ import { PeriodicitySelector } from "./PeriodicitySelector";
 interface EditModalProps {
     initialRecord: RecordData;
     onCloseCallback: () => void;
+    onSaveCallback: (updatedRecord: RecordEditable, recordId: number) => void;
     text: string;
 }
 
@@ -62,7 +63,8 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
     }
 
     handleSave() {
-        Service.updateRecord(this.props.initialRecord.id, this.state.record);
+        // Service.updateRecord(this.props.initialRecord.id, this.state.record);
+        this.props.onSaveCallback(this.state.record, this.props.initialRecord.id);
         this.props.onCloseCallback();
     }
 

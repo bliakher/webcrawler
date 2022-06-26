@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Table, Form, Button, Col } from 'react-bootstrap';
 import { ExecutionData } from '../../model/Execution';
-import { RecordData } from '../../model/Record';
+import { RecordData, RecordEditable } from '../../model/Record';
 import { MyPagination } from '../Pagination';
 import { GraphVisualization } from '../GraphVisualization';
 import { Service } from '../../api/service';
@@ -53,6 +53,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleSortByTime = this.handleSortByTime.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.handleEditClose = this.handleEditClose.bind(this);
+        this.handleEditSave = this.handleEditSave.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handlePageChange = this.handlePageChange.bind(this);
         this.handleRowCheck = this.handleRowCheck.bind(this);
@@ -86,14 +87,23 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleEditClose() {
         this.setState({showEdit: false, editedRecord: null, isNew: false});
+        window.location.reload();
+    }
+
+    handleEditSave(updatedRecord: RecordEditable, recordId: number) {
+        // TODO: show update/create result
+        if (this.state.isNew) {
+            Service.createRecord(updatedRecord);
+        } else {
+            Service.updateRecord(recordId, updatedRecord);
+        }
     }
     handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
     }
     async handleNew() {
-        var newRecord = await Service.createRecord();
-        if (!newRecord) return;
-        this.setState({showEdit: true, editedRecord: newRecord, isNew: true});
+        var emptyRecord = RecordData.createEmptyRecord()
+        this.setState({showEdit: true, editedRecord: emptyRecord, isNew: true});
     }
     handlePageChange(pageNumber: number) { this.setState({curPage: pageNumber}); }
     handleRowCheck(recordId: number) {
@@ -236,7 +246,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
 
                     { this.state.showEdit && this.state.editedRecord &&
                         <EditModal initialRecord={this.state.editedRecord} text={this.state.isNew ? "New record" : "Edit record"}
-                            onCloseCallback={this.handleEditClose} /> }
+                            onCloseCallback={this.handleEditClose} onSaveCallback={this.handleEditSave} /> }
                     
                 </>
             );
