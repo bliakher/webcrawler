@@ -94,5 +94,15 @@
 
     </changeSet>
 
+    <changeSet id="2" author="jp">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="record_tag_fk"/>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="tags" constraintName="record_tag_fk"/>
+        <addForeignKeyConstraint baseTableName="tags" baseColumnNames="webpage_id"
+                                 constraintName="record_tag_fk"
+                                 referencedTableName="webpage" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
 
 </databaseChangeLog>

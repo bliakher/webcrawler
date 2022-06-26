@@ -11,10 +11,11 @@ const { DatabaseManager } = require("../dbservice/databaseManager");
  **/
 exports.createExecution = function (body) {
   return new Promise(function (resolve, reject) {
+    console.log('executions');
     var examples = {};
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "messageCreateExec"
     };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -32,16 +33,20 @@ exports.createExecution = function (body) {
  * returns inline_response_201
  **/
 exports.createRecord = function (body) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let page = Object.assign({}, body);
+    let db = DatabaseManager.getManager();
+    let insertedNumber = await db.createWebsite(page);
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "successfully created"
     };
-    if (Object.keys(examples).length > 0) {
+    console.log(insertedNumber, page.tags.length + 1);
+    if (insertedNumber == page.tags.length + 1) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
-      resolve();
+      reject(418);
     }
   });
 }
@@ -54,16 +59,18 @@ exports.createRecord = function (body) {
  * returns inline_response_201
  **/
 exports.deleteRecord = function (recID) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let db = DatabaseManager.getManager();
+    let deletedRows = await db.deleteWebsite(recID);
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "successfully deleted"
     };
-    if (Object.keys(examples).length > 0) {
+    if (deletedRows >= 1) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
-      resolve();
+      reject(404);
     }
   });
 }
@@ -145,7 +152,8 @@ exports.getRecord = function (recID) {
     console.log(record);
     examples['application/json'] = {
       "success": true,
-      "record":  record   };
+      "record": record
+    };
     if (record.id != 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -185,16 +193,22 @@ exports.getRecords = function () {
  * returns inline_response_201
  **/
 exports.updateRecord = function (body, recID) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let dbManager = DatabaseManager.getManager();
+    let rows = await dbManager.updateWebsite(recID, body);
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "messageUpdate"
     };
-    if (Object.keys(examples).length > 0) {
+    if (rows == 1) {
       resolve(examples[Object.keys(examples)[0]]);
+    } else if (rows == 0){
+      reject(404);
+    } else if (rows < 0){
+      reject(500);
     } else {
-      resolve();
+      reject(418);
     }
   });
 }
