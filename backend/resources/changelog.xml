@@ -58,7 +58,41 @@
                 <constraints foreignKeyName="to_node_fk" referencedTableName="nodes" referencedColumnNames="id" />
             </column>
         </createTable>
+    </changeSet>
 
+    <changeSet id="1" author="jp">
+        <insert tableName="webpage">
+            <column name="url" value="http://example.org"></column>
+            <column name="regex" value="*"></column>
+            <column name="periodicity" value="4000"></column>
+            <column name="label" value="test page"></column>
+            <column name="active" value="true"></column>
+        </insert>
+
+        <insert tableName="webpage">
+            <column name="url" value="http://example.org/2"></column>
+            <column name="regex" value="[a-z]*"></column>
+            <column name="periodicity" value="2000"></column>
+            <column name="label" value="test page 2"></column>
+            <column name="active" value="false"></column>
+        </insert>
+
+        <insert tableName="tags">
+            <column name="webpage_id" value="1"></column>
+            <column name="value" value="tag1"></column>
+        </insert>
+
+        <insert tableName="tags">
+            <column name="webpage_id" value="1"></column>
+            <column name="value" value="tag2"></column>
+        </insert>
+
+        <insert tableName="tags">
+            <column name="webpage_id" value="2"></column>
+            <column name="value" value="tag1"></column>
+        </insert>
 
     </changeSet>
+
+
 </databaseChangeLog>
