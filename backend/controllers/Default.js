@@ -3,8 +3,8 @@
 var utils = require('../utils/writer.js');
 var Default = require('../service/DefaultService');
 
-
-import { notFoundResponse, generalErrorResponse, iamTeaPotUCoffeeBrewer } from '../model/errorResponses';
+var Errors = require('../model/errorResponses');
+//import { notFoundResponse, generalErrorResponse, iamTeaPotUCoffeeBrewer } from '../model/errorResponses';
 
 module.exports.createExecution = function createExecution(req, res, next, body) {
   Default.createExecution(body)
@@ -23,9 +23,9 @@ module.exports.createRecord = function createRecord(req, res, next, body) {
     })
     .catch(function (response) {
       if (response == 418) {
-        utils.writeJson(res, iamTeaPotUCoffeeBrewer);
+        utils.writeJson(res, Errors.iamTeaPotUCoffeeBrewer);
       } else {
-        utils.writeJson(res, generalErrorResponse);
+        utils.writeJson(res, Errors.generalErrorResponse);
       }
     });
 };
@@ -37,9 +37,9 @@ module.exports.deleteRecord = function deleteRecord(req, res, next, recID) {
     })
     .catch(function (response) {
       if (response == 404) {
-        utils.writeJson(res, notFoundResponse);
+        utils.writeJson(res, Errors.notFoundResponse);
       } else {
-        utils.writeJson(res, generalErrorResponse);
+        utils.writeJson(res, Errors.generalErrorResponse);
       }
     });
 };
@@ -71,9 +71,9 @@ module.exports.getRecord = function getRecord(req, res, next, recID) {
     })
     .catch(function (response) {
       if (response === 404) {
-        utils.writeJson(res, notFoundResponse);
+        utils.writeJson(res, Errors.notFoundResponse);
       } else {
-        utils.writeJson(res, generalErrorResponse);
+        utils.writeJson(res, Errors.generalErrorResponse);
       }
     });
 };
@@ -84,7 +84,7 @@ module.exports.getRecords = function getRecords(req, res, next) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, generalErrorResponse);
+      utils.writeJson(res, Errors.generalErrorResponse);
     });
 };
 
@@ -95,11 +95,11 @@ module.exports.updateRecord = function updateRecord(req, res, next, body, recID)
     })
     .catch(function (response) {
       if (response == 404) {
-        utils.writeJson(res, notFoundResponse);
+        utils.writeJson(res, Errors.notFoundResponse);
       } else if (response == 418) {
-        utils.writeJson(res, iamTeaPotUCoffeeBrewer);
+        utils.writeJson(res, Errors.iamTeaPotUCoffeeBrewer);
       } else {
-        utils.writeJson(res, generalErrorResponse);
+        utils.writeJson(res, Errors.generalErrorResponse);
       }
     });
 };

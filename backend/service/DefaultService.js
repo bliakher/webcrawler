@@ -1,6 +1,6 @@
 'use strict';
 
-const { DatabaseManager } = require("../dbservice/databaseManager");
+const { DatabaseManager } = require('../dbservice/databaseManager.ts');
 
 /**
  * Create new execution without values
