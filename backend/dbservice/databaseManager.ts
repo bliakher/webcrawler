@@ -1,5 +1,4 @@
 import { Pool } from 'pg';
-import { ModuleResolutionKind, resolveModuleName } from 'typescript';
 import { nullpage, webpage } from '../model/webpage';
 import { writeJson } from '../utils/writer';
 

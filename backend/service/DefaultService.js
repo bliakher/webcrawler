@@ -2,7 +2,6 @@
 
 const { DatabaseManager } = require("../dbservice/databaseManager");
 
-
 /**
  * Create new execution without values
  *
