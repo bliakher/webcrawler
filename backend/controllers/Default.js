@@ -3,7 +3,7 @@
 var utils = require('../utils/writer.js');
 var Default = require('../service/DefaultService');
 
-import {notFoundResponse, generalErrorResponse} from '../model/errorResponses';
+import { notFoundResponse, generalErrorResponse, iamTeaPotUCoffeeBrewer } from '../model/errorResponses';
 
 module.exports.createExecution = function createExecution(req, res, next, body) {
   Default.createExecution(body)
@@ -21,7 +21,11 @@ module.exports.createRecord = function createRecord(req, res, next, body) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response);
+      if (response == 418) {
+        utils.writeJson(res, iamTeaPotUCoffeeBrewer);
+      } else {
+        utils.writeJson(res, generalErrorResponse);
+      }
     });
 };
 
@@ -75,7 +79,7 @@ module.exports.getRecords = function getRecords(req, res, next) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response);
+      utils.writeJson(res, generalErrorResponse);
     });
 };
 

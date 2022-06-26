@@ -1,7 +1,7 @@
 export interface webpage {
     id: bigint;
     url: string,
-    regex: string,
+    regEx: string,
     periodicity: number,
     label: string,
     tags: Array<string>,
@@ -10,5 +10,5 @@ export interface webpage {
 
 export const nullpage: webpage = {
     id: BigInt(0),
-    active: false, label: "", periodicity: 0, regex: "", tags: [], url: ""
+    active: false, label: "", periodicity: 0, regEx: "", tags: [], url: ""
 }

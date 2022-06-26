@@ -11,10 +11,11 @@ const { DatabaseManager } = require("../dbservice/databaseManager");
  **/
 exports.createExecution = function (body) {
   return new Promise(function (resolve, reject) {
+    console.log('executions');
     var examples = {};
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "messageCreateExec"
     };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -32,16 +33,20 @@ exports.createExecution = function (body) {
  * returns inline_response_201
  **/
 exports.createRecord = function (body) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let page = Object.assign({}, body);
+    let db = DatabaseManager.getManager();
+    let insertedNumber = await db.createWebsite(page);
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "successfully created"
     };
-    if (Object.keys(examples).length > 0) {
+    console.log(insertedNumber, page.tags.length + 1);
+    if (insertedNumber == page.tags.length + 1) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
-      resolve();
+      reject(418);
     }
   });
 }
@@ -58,7 +63,7 @@ exports.deleteRecord = function (recID) {
     var examples = {};
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "messageDelete"
     };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);
@@ -145,7 +150,8 @@ exports.getRecord = function (recID) {
     console.log(record);
     examples['application/json'] = {
       "success": true,
-      "record":  record   };
+      "record": record
+    };
     if (record.id != 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
@@ -189,7 +195,7 @@ exports.updateRecord = function (body, recID) {
     var examples = {};
     examples['application/json'] = {
       "success": true,
-      "message": "message"
+      "message": "messageUpdate"
     };
     if (Object.keys(examples).length > 0) {
       resolve(examples[Object.keys(examples)[0]]);

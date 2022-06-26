@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { resolveModuleName } from 'typescript';
+import { ModuleResolutionKind, resolveModuleName } from 'typescript';
 import { nullpage, webpage } from '../model/webpage';
 import { writeJson } from '../utils/writer';
 
@@ -17,7 +17,7 @@ export class DatabaseManager {
 		//this.getTestData();
 	}
 
-	private async runQuery(query: string, params : any) {
+	private async runQuery(query: string, params: any) {
 		return this.pool.query(query, params);
 	}
 
@@ -43,7 +43,7 @@ export class DatabaseManager {
 		return ((await this.runQuery(`SELECT value FROM tags WHERE webpage_id = ${id} `, [])).rows).map(val => val.value);
 	}
 
-	public async getWebsites() : Promise<webpage[]> {
+	public async getWebsites(): Promise<webpage[]> {
 		let result = (await this.runQuery('SELECT * FROM webpage', [])).rows;
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
@@ -51,9 +51,9 @@ export class DatabaseManager {
 		return result;
 	}
 
-	public async getWebsite(id : bigint) : Promise<webpage> {
+	public async getWebsite(id: bigint): Promise<webpage> {
 		let resutl = (await this.runQuery(`SELECT * FROM webpage WHERE id = $1`, [id])).rows;
-		let webpage : webpage = Object.assign({}, nullpage);
+		let webpage: webpage = Object.assign({}, nullpage);
 		if (resutl.length == 0) {
 			webpage.id = BigInt(0);
 		} else {
@@ -63,10 +63,26 @@ export class DatabaseManager {
 		return webpage;
 	}
 
-	public async createWebsite(site : webpage) {
-		const params = [site.url, site.regex, site.periodicity, site.label, site.active];
-		let result = await this.runQuery(`INSERT INTO wepage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
-		//TODO
-	} 
+	public async createWebsite(site: webpage) {
+		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
+		let result = await this.runQuery(`INSERT INTO webpage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
+		let count = result.rowCount;
+		if (count >= 1) {
+			const id = result.rows[0].id;
+			for (const tag of site.tags) {
+				count += await this.createTag(id, tag);
+			}
+		}
+		return count;
+	}
+
+	private async createTag(id: bigint, tag: string) {
+		const params = [id, tag];
+		let result = await this.runQuery(`INSERT INTO tags(webpage_id, value) VALUES($1, $2)`, params);
+		console.log(result);
+		return result.rowCount;
+	}
+
+
 
 }
