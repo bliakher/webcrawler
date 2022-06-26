@@ -82,9 +82,19 @@ export class DatabaseManager {
 		return result.rowCount;
 	}
 
-	public async deleteWebsite(id : bigint) {
+	public async deleteWebsite(id: bigint) {
 		const params = [id];
 		let result = await this.runQuery('DELETE FROM webpage WHERE id = $1', params);
+		return result.rowCount;
+	}
+
+	public async updateWebsite(id: bigint, site: webpage) {
+		const params = [id, site.url, site.regEx, site.periodicity, site.label, site.active];
+		let result = (await this.runQuery(`UPDATE webpage SET url = $2, regex = $3, periodicity = $4, label = $5, active = $6 WHERE id = $1`, params))
+		await this.runQuery('DELETE FROM tags WHERE webpage_id = $1', [id]);
+		for (let tag of site.tags) {
+			await this.createTag(id, tag);
+		}
 		return result.rowCount;
 	}
 }

@@ -193,16 +193,22 @@ exports.getRecords = function () {
  * returns inline_response_201
  **/
 exports.updateRecord = function (body, recID) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let dbManager = DatabaseManager.getManager();
+    let rows = await dbManager.updateWebsite(recID, body);
     examples['application/json'] = {
       "success": true,
       "message": "messageUpdate"
     };
-    if (Object.keys(examples).length > 0) {
+    if (rows == 1) {
       resolve(examples[Object.keys(examples)[0]]);
+    } else if (rows == 0){
+      reject(404);
+    } else if (rows < 0){
+      reject(500);
     } else {
-      resolve();
+      reject(418);
     }
   });
 }

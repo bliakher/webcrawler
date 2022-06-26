@@ -3,6 +3,7 @@
 var utils = require('../utils/writer.js');
 var Default = require('../service/DefaultService');
 
+import { textChangeRangeIsUnchanged } from 'typescript';
 import { notFoundResponse, generalErrorResponse, iamTeaPotUCoffeeBrewer } from '../model/errorResponses';
 
 module.exports.createExecution = function createExecution(req, res, next, body) {
@@ -93,6 +94,12 @@ module.exports.updateRecord = function updateRecord(req, res, next, body, recID)
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response);
+      if (response == 404) {
+        utils.writeJson(res, notFoundResponse);
+      } else if (response == 418) {
+        utils.writeJson(res, iamTeaPotUCoffeeBrewer);
+      } else {
+        utils.writeJson(res, generalErrorResponse);
+      }
     });
 };
