@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { resolveModuleName } from 'typescript';
-import { webpage } from '../model/webpage';
+import { nullpage, webpage } from '../model/webpage';
+import { writeJson } from '../utils/writer';
 
 export class DatabaseManager {
 
@@ -47,23 +48,25 @@ export class DatabaseManager {
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
 		}
-		console.log(result);
 		return result;
 	}
 
 	public async getWebsite(id : bigint) : Promise<webpage> {
-		let resutl = (await this.runQuery(`SELECT * FROM webpage WHERE webpage_id = $1`, [id])).rows;
+		let resutl = (await this.runQuery(`SELECT * FROM webpage WHERE id = $1`, [id])).rows;
+		let webpage : webpage = Object.assign({}, nullpage);
 		if (resutl.length == 0) {
-			//TODO throw not found
+			webpage.id = BigInt(0);
+		} else {
+			webpage = resutl[0];
+			webpage.tags = await this.getWebsitesTags(id);
 		}
-		let webpage : webpage = resutl[0];
-		webpage.tags = await this.getWebsitesTags(id);
 		return webpage;
 	}
 
 	public async createWebsite(site : webpage) {
 		const params = [site.url, site.regex, site.periodicity, site.label, site.active];
 		let result = await this.runQuery(`INSERT INTO wepage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
+		//TODO
 	} 
 
 }

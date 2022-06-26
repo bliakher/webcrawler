@@ -138,26 +138,18 @@ exports.getExecutions = function () {
  * returns inline_response_200_1
  **/
 exports.getRecord = function (recID) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let db = DatabaseManager.getManager();
+    const record = await db.getWebsite(recID);
+    console.log(record);
     examples['application/json'] = {
       "success": true,
-      "record": {
-        "regEx": "regEx",
-        "lastExecution": "lastExecution",
-        "executionStatus": 6,
-        "periodicity": "periodicity",
-        "active": true,
-        "id": 0,
-        "label": "label",
-        "url": "url",
-        "tags": ["tags", "tags"]
-      }
-    };
-    if (Object.keys(examples).length > 0) {
+      "record":  record   };
+    if (record.id != 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
-      resolve();
+      reject(404);
     }
   });
 }
