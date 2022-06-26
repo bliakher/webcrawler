@@ -1,6 +1,6 @@
 import { ExecutionData } from '../model/Execution';
 import { RecordData, RecordEditable } from '../model/Record';
-import { IRecord, IExecution } from './model';
+import { IRecord, IExecution, IRecordUpdate } from './model';
 import { testRecords } from './testRecords';
 import { testExecutions } from './testExecutions';
 
@@ -11,6 +11,8 @@ export interface APIResponse<T> {
 
 var records = testRecords.map(dataObj => new RecordData(dataObj));
 var counter = 7;
+
+const url = "http://localhost:3000";
 
 export class Service {
 
@@ -33,22 +35,144 @@ export class Service {
     //         }
     // }
 
+    private static getHeaders() {
+        return  {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        };
+    }
+
+    private static encodeBody(bodyObj: object) {
+        return JSON.stringify(bodyObj);
+    }
+
+    private static getFetchParams(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: object) {
+        return {
+            method: method,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: this.encodeBody(body)
+        };
+    }
+
     static async getRecords(): Promise<RecordData[] | null> {
-        return this.getTestRecordData();
+        // return this.getTestRecordData();
+        try {
+            const response = await fetch(url + "/records", this.getFetchParams('GET', {}));
+            const parsed = await response.json();
+            if (!parsed.success) return null;
+            var recordObjs: IRecord[] = parsed.records;
+            return recordObjs.map(record => new RecordData(record));
+        } catch(error) {
+            console.log(error);
+            return null;
+        }
     }
 
-    // returns new record id
-    static async createRecord(): Promise<RecordData | null> {
-        return this.testCreate();
+    static async getRecord(recordId: number): Promise<RecordData | null> {
+        try {
+            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('GET', {}));
+            const parsed = await response.json();
+            return parsed.success ? new RecordData(parsed.record) : null;
+            
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
     }
 
-    static async updateRecord(recordId: number, recordData: RecordEditable): Promise<void> {
-        return this.testUpdate(recordId, recordData);
+    static async createRecord(newRecord: RecordEditable): Promise<boolean> {
+        // return this.testCreate();
+        const body = this.transformRecordData(newRecord);
+        try {
+            const response = await fetch(url + "/records", this.getFetchParams('POST', body));
+            const parsed = await response.json();
+            return parsed.success;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async updateRecord(recordId: number, record: RecordEditable): Promise<boolean> {
+        // return this.testUpdate(recordId, recordData);
+        const body = this.transformRecordData(record);
+        try {
+            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('PUT', body));
+            const parsed = await response.json();
+            return parsed.success;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async deleteRecord(recordId: number): Promise<boolean> {
+        try {
+            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('DELETE', {}));
+            const parsed = await response.json();
+            return parsed.success;
+        } catch(error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async getExecutions(): Promise<ExecutionData[] | null> {
+        // return this.getTestExecutionData();
+        try {
+            const response = await fetch(url + "/executions", this.getFetchParams('GET', {}));
+            const parsed = await response.json();
+            if (!parsed.success) return null;
+            var execObjs: IExecution[] = parsed.executions;
+            return execObjs.map(execution => new ExecutionData(execution));
+        } catch(error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    static async getExecution(executionId: number): Promise<ExecutionData | null> {
+        try {
+            const response = await fetch(url + "/executions/" + executionId, this.getFetchParams('GET', {}));
+            const parsed = await response.json();
+            return parsed.success ? new ExecutionData(parsed.execution) : null;
+            
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    static async createExecution(recordId: number): Promise<boolean> {
+        const body = {"recordId": recordId };
+        try {
+            const response = await fetch(url + "/executions", this.getFetchParams('POST', body));
+            const parsed = await response.json();
+            return parsed.success;
+        } catch (error) {
+            console.log();
+            return false;
+        }
+    }
+
+    private static transformRecordData(record: RecordEditable): IRecordUpdate {
+        return {
+            url: record.url,
+            label: record.label,
+            regEx: record.regEx,
+            active: record.active,
+            tags: record.tags,
+            periodicity: record.periodicity.getMinutes()
+        };
     }
 
     private static testCreate(): RecordData {
         var recordId = counter++;
-        var record = RecordData.createEmptyRecord(recordId);
+        var record = RecordData.createEmptyRecord();
+        record.id = recordId;
         records.push(record);
         return record;
 
@@ -67,10 +191,6 @@ export class Service {
 
     private static getTestRecordData(): RecordData[] {
         return records;
-    }
-
-    static async getExecutions(): Promise<ExecutionData[] | null> {
-        return this.getTestExecutionData();
     }
 
     private static getTestExecutionData(): ExecutionData[] {

@@ -38,10 +38,10 @@ export class RecordData {
         return found.length > 0 ? found[0] : null;
     }
 
-    static createEmptyRecord(recordId: number): RecordData {
+    static createEmptyRecord(): RecordData {
         //TODO: ??? how is created in the database
         return new RecordData({
-            id: recordId,
+            id: -1, // invalid id
             url: "",
             label: "",
             regEx: "",
@@ -73,7 +73,11 @@ export class Periodicity {
         this.minutes = minutes % 60 ;
     }
 
-    padWithZero(num: number): string {
+    getMinutes(): number {
+        return this.days * 1440 + this.hours * 60 + this.minutes;
+    }
+
+    private padWithZero(num: number): string {
         return (num < 10 ? '0' : '') + num.toString();
     }
     toString(): string {
