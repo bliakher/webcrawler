@@ -79,10 +79,12 @@ export class DatabaseManager {
 	private async createTag(id: bigint, tag: string) {
 		const params = [id, tag];
 		let result = await this.runQuery(`INSERT INTO tags(webpage_id, value) VALUES($1, $2)`, params);
-		console.log(result);
 		return result.rowCount;
 	}
 
-
-
+	public async deleteWebsite(id : bigint) {
+		const params = [id];
+		let result = await this.runQuery('DELETE FROM webpage WHERE id = $1', params);
+		return result.rowCount;
+	}
 }

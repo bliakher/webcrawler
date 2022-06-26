@@ -35,7 +35,11 @@ module.exports.deleteRecord = function deleteRecord(req, res, next, recID) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response);
+      if (response == 404) {
+        utils.writeJson(res, notFoundResponse);
+      } else {
+        utils.writeJson(res, generalErrorResponse);
+      }
     });
 };
 

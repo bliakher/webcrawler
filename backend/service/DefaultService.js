@@ -59,16 +59,18 @@ exports.createRecord = function (body) {
  * returns inline_response_201
  **/
 exports.deleteRecord = function (recID) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let db = DatabaseManager.getManager();
+    let deletedRows = await db.deleteWebsite(recID);
     examples['application/json'] = {
       "success": true,
-      "message": "messageDelete"
+      "message": "successfully deleted"
     };
-    if (Object.keys(examples).length > 0) {
+    if (deletedRows >= 1) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
-      resolve();
+      reject(404);
     }
   });
 }
