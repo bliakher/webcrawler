@@ -46,7 +46,17 @@ export class Service {
         return JSON.stringify(bodyObj);
     }
 
-    private static getFetchParams(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: object) {
+    private static getFetchParams(method: 'GET' | 'POST' | 'PUT' | 'DELETE') {
+        return {
+            method: method,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        };
+    }
+
+    private static getFetchParamsWithBody(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: object) {
         return {
             method: method,
             headers: {
@@ -60,7 +70,7 @@ export class Service {
     static async getRecords(): Promise<RecordData[] | null> {
         // return this.getTestRecordData();
         try {
-            const response = await fetch(url + "/records") //, this.getFetchParams('GET', {}));
+            const response = await fetch(url + "/records", this.getFetchParams('GET'));
             const parsed = await response.json();
             if (!parsed.success) return null;
             var recordObjs: IRecord[] = parsed.records;
@@ -73,7 +83,7 @@ export class Service {
 
     static async getRecord(recordId: number): Promise<RecordData | null> {
         try {
-            const response = await fetch(url + "/records/" + recordId) //, this.getFetchParams('GET', {}));
+            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('GET'));
             const parsed = await response.json();
             return parsed.success ? new RecordData(parsed.record) : null;
             
@@ -87,7 +97,7 @@ export class Service {
         // return this.testCreate();
         const body = this.transformRecordData(newRecord);
         try {
-            const response = await fetch(url + "/records", this.getFetchParams('POST', body));
+            const response = await fetch(url + "/records", this.getFetchParamsWithBody('POST', body));
             const parsed = await response.json();
             return parsed.success;
         } catch (error) {
@@ -100,8 +110,9 @@ export class Service {
         // return this.testUpdate(recordId, recordData);
         const body = this.transformRecordData(record);
         try {
-            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('PUT', body));
+            const response = await fetch(url + "/records/" + recordId, this.getFetchParamsWithBody('PUT', body));
             const parsed = await response.json();
+            console.log("update: ", parsed.success);
             return parsed.success;
         } catch (error) {
             console.log(error);
@@ -111,7 +122,7 @@ export class Service {
 
     static async deleteRecord(recordId: number): Promise<boolean> {
         try {
-            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('DELETE', {}));
+            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('DELETE'));
             const parsed = await response.json();
             return parsed.success;
         } catch(error) {
@@ -123,7 +134,7 @@ export class Service {
     static async getExecutions(): Promise<ExecutionData[] | null> {
         // return this.getTestExecutionData();
         try {
-            const response = await fetch(url + "/executions", this.getFetchParams('GET', {}));
+            const response = await fetch(url + "/executions", this.getFetchParams('GET'));
             const parsed = await response.json();
             if (!parsed.success) return null;
             var execObjs: IExecution[] = parsed.executions;
@@ -136,7 +147,7 @@ export class Service {
 
     static async getExecution(executionId: number): Promise<ExecutionData | null> {
         try {
-            const response = await fetch(url + "/executions/" + executionId, this.getFetchParams('GET', {}));
+            const response = await fetch(url + "/executions/" + executionId, this.getFetchParams('GET'));
             const parsed = await response.json();
             return parsed.success ? new ExecutionData(parsed.execution) : null;
             
@@ -149,7 +160,7 @@ export class Service {
     static async createExecution(recordId: number): Promise<boolean> {
         const body = {"recordId": recordId };
         try {
-            const response = await fetch(url + "/executions", this.getFetchParams('POST', body));
+            const response = await fetch(url + "/executions", this.getFetchParamsWithBody('POST', body));
             const parsed = await response.json();
             return parsed.success;
         } catch (error) {
