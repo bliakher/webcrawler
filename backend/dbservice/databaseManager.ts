@@ -64,7 +64,7 @@ export class DatabaseManager {
 
 	public async createWebsite(site: webpage) {
 		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
-		let result = await this.runQuery(`INSERT INTO webpage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
+		let result = await this.runQuery(`INSERT INTO webpage(url, regEx, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
 		let count = result.rowCount;
 		if (count >= 1) {
 			const id = result.rows[0].id;
@@ -89,7 +89,7 @@ export class DatabaseManager {
 
 	public async updateWebsite(id: bigint, site: webpage) {
 		const params = [id, site.url, site.regEx, site.periodicity, site.label, site.active];
-		let result = (await this.runQuery(`UPDATE webpage SET url = $2, regex = $3, periodicity = $4, label = $5, active = $6 WHERE id = $1`, params))
+		let result = (await this.runQuery(`UPDATE webpage SET url = $2, regEx = $3, periodicity = $4, label = $5, active = $6 WHERE id = $1`, params))
 		await this.runQuery('DELETE FROM tags WHERE webpage_id = $1', [id]);
 		for (let tag of site.tags) {
 			await this.createTag(id, tag);

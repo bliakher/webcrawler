@@ -234,7 +234,7 @@ components:
               periodicity:
                 type: string
               label:
-                type: string
+                type: integer
               active:
                 type: boolean
               tags:
@@ -293,7 +293,7 @@ components:
         regEx:
           type: string
         periodicity:
-          type: string
+          type: integer
         label:
           type: string
         active:
@@ -385,7 +385,7 @@ components:
         regEx:
           type: string
         periodicity:
-          type: string
+          type: integer
         label:
           type: string
         active:

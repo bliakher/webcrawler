@@ -105,4 +105,12 @@
                                  onDelete="CASCADE"/>
     </changeSet>
 
+    <changeSet  author="jp"  id="3">  
+        <renameColumn  
+                columnDataType="VARCHAR(250)"  
+                newColumnName="regEx"  
+                oldColumnName="regex"  
+                tableName="webpage"/>  
+    </changeSet>
+
 </databaseChangeLog>
