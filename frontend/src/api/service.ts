@@ -12,7 +12,7 @@ export interface APIResponse<T> {
 var records = testRecords.map(dataObj => new RecordData(dataObj));
 var counter = 7;
 
-const url = "http://localhost:3000";
+const url = "http://localhost:8080";
 
 export class Service {
 
@@ -60,7 +60,7 @@ export class Service {
     static async getRecords(): Promise<RecordData[] | null> {
         // return this.getTestRecordData();
         try {
-            const response = await fetch(url + "/records", this.getFetchParams('GET', {}));
+            const response = await fetch(url + "/records") //, this.getFetchParams('GET', {}));
             const parsed = await response.json();
             if (!parsed.success) return null;
             var recordObjs: IRecord[] = parsed.records;
@@ -73,7 +73,7 @@ export class Service {
 
     static async getRecord(recordId: number): Promise<RecordData | null> {
         try {
-            const response = await fetch(url + "/records/" + recordId, this.getFetchParams('GET', {}));
+            const response = await fetch(url + "/records/" + recordId) //, this.getFetchParams('GET', {}));
             const parsed = await response.json();
             return parsed.success ? new RecordData(parsed.record) : null;
             
