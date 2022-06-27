@@ -96,21 +96,19 @@
 
     <changeSet id="2" author="jp">
         <preConditions onFail="MARK_RAN">
-            <foreignKeyConstraintExists foreignKeyName="record_tag_fk"/>
+            <foreignKeyConstraintExists foreignKeyName="record_tag_fk" />
         </preConditions>
-        <dropForeignKeyConstraint baseTableName="tags" constraintName="record_tag_fk"/>
-        <addForeignKeyConstraint baseTableName="tags" baseColumnNames="webpage_id"
-                                 constraintName="record_tag_fk"
-                                 referencedTableName="webpage" referencedColumnNames="id"
-                                 onDelete="CASCADE"/>
+        <dropForeignKeyConstraint baseTableName="tags" constraintName="record_tag_fk" />
+        <addForeignKeyConstraint baseTableName="tags" baseColumnNames="webpage_id" constraintName="record_tag_fk" referencedTableName="webpage" referencedColumnNames="id" onDelete="CASCADE" />
     </changeSet>
 
-    <changeSet  author="jp"  id="3">  
-        <renameColumn  
-                columnDataType="VARCHAR(250)"  
-                newColumnName="regEx"  
-                oldColumnName="regex"  
-                tableName="webpage"/>  
+    <changeSet author="jp" id="3">
+        <renameColumn columnDataType="VARCHAR(250)" newColumnName="regEx" oldColumnName="regex" tableName="webpage" />
     </changeSet>
+
+    <changeSet author="jp" id="4">
+        <renameColumn columnDataType="VARCHAR(250)" newColumnName="regex" oldColumnName="regEx" tableName="webpage" />
+    </changeSet>
+
 
 </databaseChangeLog>

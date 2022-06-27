@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { ModuleResolutionKind } from 'typescript';
 import { nullpage, webpage } from '../model/webpage';
 import { writeJson } from '../utils/writer';
 
@@ -38,16 +39,30 @@ export class DatabaseManager {
 		});
 	}
 
+	private parseResultToWebpage(result : any) : webpage {
+		return {
+			id : result.id,
+			regEx : result.regex,
+			label : result.label,
+			periodicity : result.periodicity,
+			tags : result.tags,
+			active : result.active,
+			url : result.url,
+		}
+	}
+
 	private async getWebsitesTags(id: bigint): Promise<string[]> {
 		return ((await this.runQuery(`SELECT value FROM tags WHERE webpage_id = ${id} `, [])).rows).map(val => val.value);
 	}
 
 	public async getWebsites(): Promise<webpage[]> {
 		let result = (await this.runQuery('SELECT * FROM webpage', [])).rows;
+		let pages = [];
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
+			pages.push(this.parseResultToWebpage(row));
 		}
-		return result;
+		return pages;
 	}
 
 	public async getWebsite(id: bigint): Promise<webpage> {
@@ -58,13 +73,14 @@ export class DatabaseManager {
 		} else {
 			webpage = resutl[0];
 			webpage.tags = await this.getWebsitesTags(id);
+			webpage = this.parseResultToWebpage(webpage);
 		}
 		return webpage;
 	}
 
 	public async createWebsite(site: webpage) {
 		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
-		let result = await this.runQuery(`INSERT INTO webpage(url, regEx, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
+		let result = await this.runQuery(`INSERT INTO webpage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
 		let count = result.rowCount;
 		if (count >= 1) {
 			const id = result.rows[0].id;
@@ -89,7 +105,7 @@ export class DatabaseManager {
 
 	public async updateWebsite(id: bigint, site: webpage) {
 		const params = [id, site.url, site.regEx, site.periodicity, site.label, site.active];
-		let result = (await this.runQuery(`UPDATE webpage SET url = $2, regEx = $3, periodicity = $4, label = $5, active = $6 WHERE id = $1`, params))
+		let result = (await this.runQuery(`UPDATE webpage SET url = $2, regex = $3, periodicity = $4, label = $5, active = $6 WHERE id = $1`, params))
 		await this.runQuery('DELETE FROM tags WHERE webpage_id = $1', [id]);
 		for (let tag of site.tags) {
 			await this.createTag(id, tag);
