@@ -87,7 +87,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleEditClose() {
         this.setState({showEdit: false, editedRecord: null, isNew: false});
-        window.location.reload();
+        // window.location.reload();
     }
 
     handleEditSave(updatedRecord: RecordEditable, recordId: number) {
@@ -100,6 +100,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
+        Service.deleteRecord(recordId);
     }
     async handleNew() {
         var emptyRecord = RecordData.createEmptyRecord()
