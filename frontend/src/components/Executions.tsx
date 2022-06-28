@@ -168,8 +168,8 @@ const ExecutionRow = (props: ExecutionRowProps) => {
         <tr>
             <td>{props.recordLabel}</td>
             <td>{ExecutionData.getStatusString(execution.status)}</td>
-            <td>{execution.startTime ? execution.startTime.toISOString() : "-"}</td>
-            <td>{execution.endTime ? execution.endTime.toISOString() : "-"}</td>
+            <td>{execution.startTime ? execution.startTime.toString() : "-"}</td>
+            <td>{execution.endTime ? execution.endTime.toString() : "-"}</td>
             <td>{execution.endTime ? execution.crawledSites : "-"}</td>
         </tr>
     );
