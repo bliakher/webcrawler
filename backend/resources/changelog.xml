@@ -110,5 +110,20 @@
         <renameColumn columnDataType="VARCHAR(250)" newColumnName="regex" oldColumnName="regEx" tableName="webpage" />
     </changeSet>
 
-
+    <changeSet author="jp" id="5">
+        <insert tableName="webpage">
+            <column name="url" value="http://example_three.org"></column>
+            <column name="regex" value="*"></column>
+            <column name="periodicity" value="1864"></column>
+            <column name="label" value="my test page"></column>
+            <column name="active" value="true"></column>
+        </insert>
+        <insert tableName="webpage">
+            <column name="url" value="http://example_four.org"></column>
+            <column name="regex" value="*"></column>
+            <column name="periodicity" value="100000"></column>
+            <column name="label" value="awesome page"></column>
+            <column name="active" value="true"></column>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
