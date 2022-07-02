@@ -149,4 +149,39 @@
             <column name="webpage_id" value="2"></column>
         </insert>
     </changeSet>
+
+    <changeSet id="cascade delete of execution for webpage deleted" author="jp">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="exec_owner_record_fk" />
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="execution" constraintName="exec_owner_record_fk" />
+        <addForeignKeyConstraint baseTableName="execution" baseColumnNames="webpage_id" constraintName="exec_owner_record_fk" referencedTableName="webpage" referencedColumnNames="id" onDelete="CASCADE" />
+    </changeSet>
+
+    <changeSet id="rereference nodes to execution not webpage" author="jp">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="owner_record_fk" />
+        </preConditions>
+
+        <renameColumn tableName="nodes" oldColumnName="webpage_id" newColumnName="executionid" />
+        <dropForeignKeyConstraint baseTableName="nodes" constraintName="owner_record_fk" />
+        <addForeignKeyConstraint baseTableName="nodes" baseColumnNames="executionid" constraintName="owner_exec_fk" referencedTableName="execution" referencedColumnNames="id" onDelete="CASCADE" />
+    </changeSet>
+
+    <changeSet id="cascade delete from nodes connections" author="jp">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="from_node_fk" />
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="nodeLinks" constraintName="from_node_fk" />
+        <addForeignKeyConstraint baseTableName="nodeLinks" baseColumnNames="node_id_from" constraintName="from_node_fk" referencedTableName="nodes" referencedColumnNames="id" onDelete="CASCADE" />
+    </changeSet>
+
+    <changeSet id="cascade delete to nodes connections" author="jp">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="to_node_fk" />
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="nodeLinks" constraintName="to_node_fk" />
+        <addForeignKeyConstraint baseTableName="nodeLinks" baseColumnNames="node_id_to" constraintName="to_node_fk" referencedTableName="nodes" referencedColumnNames="id" onDelete="CASCADE" />
+    </changeSet>
+
 </databaseChangeLog>

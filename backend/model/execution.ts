@@ -7,6 +7,12 @@ export interface execution {
     crawledSites : number
 }
 
+export interface startingExecution {
+    executionStatus : number,
+    startTime : Date
+    crawledSites : number,
+}
+
 export const nullexecution : execution = {
     id : BigInt(0),
     crawledSites : 0,
