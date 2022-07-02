@@ -9,17 +9,19 @@ const { DatabaseManager } = require('../dbservice/databaseManager.ts');
  * returns inline_response_201
  **/
 exports.createExecution = function (body) {
-  return new Promise(function (resolve, reject) {
-    console.log('executions');
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let db = DatabaseManager.getManager();
+    let record = await db.getWebsite(body.recordId);
     examples['application/json'] = {
       "success": true,
       "message": "messageCreateExec"
     };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
+    if (record.id == 0) {
+      reject(404);
     } else {
-      resolve();
+      //TODO call executioner
+      resolve(examples[Object.keys(examples)[0]]);
     }
   });
 }

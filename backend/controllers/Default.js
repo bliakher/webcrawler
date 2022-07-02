@@ -12,7 +12,11 @@ module.exports.createExecution = function createExecution(req, res, next, body) 
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      utils.writeJson(res, response);
+      if (response === 404) {
+        utils.writeJson(res, Errors.notFoundResponse);
+      } else {
+        utils.writeJson(res, Errors.generalErrorResponse);
+      }
     });
 };
 
