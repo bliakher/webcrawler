@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import { ModuleResolutionKind } from 'typescript';
+import { execution, nullexecution } from '../model/execution';
 import { nullpage, webpage } from '../model/webpage';
 import { writeJson } from '../utils/writer';
 
@@ -39,17 +40,26 @@ export class DatabaseManager {
 		});
 	}
 
-	private parseResultToWebpage(result : any) : webpage {
+	private parseResultToWebpage(result: any): webpage {
 		return {
-			id : result.id,
-			regEx : result.regex,
-			label : result.label,
-			periodicity : result.periodicity,
-			tags : result.tags,
-			active : result.active,
-			url : result.url,
+			id: result.id,
+			regEx: result.regex,
+			label: result.label,
+			periodicity: result.periodicity,
+			tags: result.tags,
+			active: result.active,
+			url: result.url,
+		}
+	}
+
+	private parseResultToExecution(result: any): execution {
+		return {
+			id: result.id,
+			recId: result.webpage_id,
 			executionStatus: result.executionstatus,
-			executionTime: result.executiontime
+			startTime: result.starttime,
+			endTime: result.endtime,
+			crawledSites: result.crawledsites,
 		}
 	}
 
@@ -115,4 +125,33 @@ export class DatabaseManager {
 		return result.rowCount;
 	}
 
+	public async getExecutions() {
+		let result = (await this.runQuery('SELECT * FROM execution', [])).rows;
+		let executions: execution[] = [];
+		for (let exec of result) {
+			executions.push(this.parseResultToExecution(exec));
+		}
+		return executions;
+	}
+
+	public async getExecution(id: bigint) : Promise<execution> {
+		const params = [id];
+		let result = (await this.runQuery(`SELECT * FROM execution WHERE id = $1`, params)).rows;
+		let execu : execution = Object.assign({}, nullexecution);
+		if (result.length == 0) {
+			execu.id = BigInt(0);
+		} else {
+			execu = this.parseResultToExecution(result[0]);
+		}
+		return execu;
+	}
+
+	public async logNewExecution(): Promise<bigint> {
+		//TODO
+		return BigInt(0);
+	}
+
+	public async executionEnd() {
+		//TODO
+	}
 }

@@ -455,22 +455,25 @@ components:
       properties:
         success:
           type: boolean
-        id:
-          type: integer
-          format: int64
-        recId:
-          type: integer
-          format: int64
-        executionStatus:
-          type: integer
-          format: int64
-        startTime:
-          type: string
-        endTime:
-          type: string
-        crawledSites:
-          type: integer
-          format: int64
+        exeuction:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            recId:
+              type: integer
+              format: int64
+            executionStatus:
+              type: integer
+              format: int64
+            startTime:
+              type: string
+            endTime:
+              type: string
+            crawledSites:
+              type: integer
+              format: int64
       example:
         success: true
         executionStatus: 1
