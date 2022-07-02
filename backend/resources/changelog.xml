@@ -126,4 +126,11 @@
             <column name="active" value="true"></column>
         </insert>
     </changeSet>
+
+    <changeSet id="6" author="jp">
+        <addColumn tableName="webpage">
+            <column name="executiontime" type="DATETIME" valueDate="2022-30-06T11:00:00"></column>
+            <column name="executionstatus" type="INTEGER" value="0"></column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -48,6 +48,8 @@ export class DatabaseManager {
 			tags : result.tags,
 			active : result.active,
 			url : result.url,
+			executionStatus: result.executionstatus,
+			executionTime: result.executiontime
 		}
 	}
 
@@ -112,4 +114,5 @@ export class DatabaseManager {
 		}
 		return result.rowCount;
 	}
+
 }
