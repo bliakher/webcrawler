@@ -45,6 +45,7 @@ exports.createRecord = function (body) {
     };
     console.log(insertedNumber, page.tags.length + 1);
     if (insertedNumber == page.tags.length + 1) {
+      //TODO create new execution from executioner
       resolve(examples[Object.keys(examples)[0]]);
     } else {
       reject(418);

@@ -184,4 +184,36 @@
         <addForeignKeyConstraint baseTableName="nodeLinks" baseColumnNames="node_id_to" constraintName="to_node_fk" referencedTableName="nodes" referencedColumnNames="id" onDelete="CASCADE" />
     </changeSet>
 
+    <changeSet id="insert exec for all pages" author="jp">
+        <insert tableName="execution">
+            <column name="executionstatus" value="0"></column>
+            <column name="starttime" value="2020-06-30T00:00:00"></column>
+            <column name="endtime" value="2020-06-30T01:00:00"></column>
+            <column name="crawledsites" value="5"></column>
+            <column name="webpage_id" value="1"></column>
+        </insert>
+        <insert tableName="execution">
+            <column name="executionstatus" value="0"></column>
+            <column name="starttime" value="2020-06-30T10:00:00"></column>
+            <column name="endtime" value="2020-06-30T01:00:00"></column>
+            <column name="crawledsites" value="5"></column>
+            <column name="webpage_id" value="2"></column>
+        </insert>
+        <insert tableName="execution">
+            <column name="executionstatus" value="0"></column>
+            <column name="starttime" value="2020-06-30T00:00:00"></column>
+            <column name="endtime" value="2020-06-30T01:00:00"></column>
+            <column name="crawledsites" value="5"></column>
+            <column name="webpage_id" value="3"></column>
+        </insert>
+        <insert tableName="execution">
+            <column name="executionstatus" value="0"></column>
+            <column name="starttime" value="2020-06-30T00:00:00"></column>
+            <column name="endtime" value="2020-06-30T01:00:00"></column>
+            <column name="crawledsites" value="5"></column>
+            <column name="webpage_id" value="4"></column>
+        </insert>
+
+    </changeSet>
+
 </databaseChangeLog>

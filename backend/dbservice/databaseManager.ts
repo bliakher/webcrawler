@@ -1,8 +1,6 @@
 import { Pool } from 'pg';
-import { ModuleResolutionKind } from 'typescript';
 import { execution, nullexecution, startingExecution } from '../model/execution';
 import { nullpage, webpage } from '../model/webpage';
-import { writeJson } from '../utils/writer';
 
 export class DatabaseManager {
 
@@ -14,8 +12,6 @@ export class DatabaseManager {
 		let conStr = process.env.DATABASE_URL;
 		this.pool = new Pool({ connectionString: conStr });
 		this.pool.connect();
-
-		//this.getTestData();
 	}
 
 	private async runQuery(query: string, params: any) {
@@ -29,17 +25,6 @@ export class DatabaseManager {
 		return DatabaseManager.instance;
 	}
 
-
-	private async getTestData() {
-		this.pool.query('SELECT * FROM test_table', (err, res) => {
-			if (err) {
-				console.log(err.stack)
-			} else {
-				console.log(res.rows)
-			}
-		});
-	}
-
 	private parseResultToWebpage(result: any): webpage {
 		return {
 			id: result.id,
@@ -49,6 +34,8 @@ export class DatabaseManager {
 			tags: result.tags,
 			active: result.active,
 			url: result.url,
+			lastExecStatus : result.executionStatus,
+			lastExecTime: result.executionTime
 		}
 	}
 
@@ -72,6 +59,11 @@ export class DatabaseManager {
 		let pages = [];
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
+			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)` , [row.id]));
+			if (lastExecution.rowCount >= 1) {
+				row.executionStatus = lastExecution.rows[0].executionstatus;
+				row.executionTime = lastExecution.rows[0].starttime;
+			}
 			pages.push(this.parseResultToWebpage(row));
 		}
 		return pages;
@@ -83,9 +75,14 @@ export class DatabaseManager {
 		if (resutl.length == 0) {
 			webpage.id = BigInt(0);
 		} else {
-			webpage = resutl[0];
-			webpage.tags = await this.getWebsitesTags(id);
-			webpage = this.parseResultToWebpage(webpage);
+			let res = resutl[0];
+			res.tags = await this.getWebsitesTags(id);
+			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)`, [webpage.id]));
+			if (lastExecution.rowCount >= 1) {
+				res.executionStatus = lastExecution.rows[0].executionstatus;
+				res.executionTime = lastExecution.rows[0].starttime;
+			}
+			webpage = this.parseResultToWebpage(res);
 		}
 		return webpage;
 	}
@@ -160,10 +157,9 @@ export class DatabaseManager {
 	}
 
 	//if rowCount <= 1 the execution doesn't exist
-	public async executionUpdate(exec : execution) {
+	public async executionUpdate(exec: execution) {
 		const params = [exec.id, exec.executionStatus, exec.endTime, exec.crawledSites]
 		let result = await this.runQuery(`UPDATE execution SET executionstatus = $2, endtime = $3, crawledsites = $4  WHERE id = $1`, params);
 		return result.rowCount;
-		//TODO update pages
 	}
 }
