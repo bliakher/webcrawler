@@ -6,6 +6,8 @@ export interface webpage {
     label: string,
     tags: Array<string>,
     active: boolean,
+    lastExecTime?: string,
+    lastExecStatus?: number
 }
 
 export const nullpage: webpage = {

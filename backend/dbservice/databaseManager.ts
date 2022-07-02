@@ -1,7 +1,6 @@
 import { Pool } from 'pg';
-import { ModuleResolutionKind } from 'typescript';
+import { execution, nullexecution, startingExecution } from '../model/execution';
 import { nullpage, webpage } from '../model/webpage';
-import { writeJson } from '../utils/writer';
 
 export class DatabaseManager {
 
@@ -13,8 +12,6 @@ export class DatabaseManager {
 		let conStr = process.env.DATABASE_URL;
 		this.pool = new Pool({ connectionString: conStr });
 		this.pool.connect();
-
-		//this.getTestData();
 	}
 
 	private async runQuery(query: string, params: any) {
@@ -28,26 +25,28 @@ export class DatabaseManager {
 		return DatabaseManager.instance;
 	}
 
-
-	private async getTestData() {
-		this.pool.query('SELECT * FROM test_table', (err, res) => {
-			if (err) {
-				console.log(err.stack)
-			} else {
-				console.log(res.rows)
-			}
-		});
+	private parseResultToWebpage(result: any): webpage {
+		return {
+			id: result.id,
+			regEx: result.regex,
+			label: result.label,
+			periodicity: result.periodicity,
+			tags: result.tags,
+			active: result.active,
+			url: result.url,
+			lastExecStatus : result.executionStatus,
+			lastExecTime: result.executionTime
+		}
 	}
 
-	private parseResultToWebpage(result : any) : webpage {
+	private parseResultToExecution(result: any): execution {
 		return {
-			id : result.id,
-			regEx : result.regex,
-			label : result.label,
-			periodicity : result.periodicity,
-			tags : result.tags,
-			active : result.active,
-			url : result.url,
+			id: result.id,
+			recId: result.webpage_id,
+			executionStatus: result.executionstatus,
+			startTime: result.starttime,
+			endTime: result.endtime,
+			crawledSites: result.crawledsites,
 		}
 	}
 
@@ -60,6 +59,11 @@ export class DatabaseManager {
 		let pages = [];
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
+			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)` , [row.id]));
+			if (lastExecution.rowCount >= 1) {
+				row.executionStatus = lastExecution.rows[0].executionstatus;
+				row.executionTime = lastExecution.rows[0].starttime;
+			}
 			pages.push(this.parseResultToWebpage(row));
 		}
 		return pages;
@@ -71,9 +75,14 @@ export class DatabaseManager {
 		if (resutl.length == 0) {
 			webpage.id = BigInt(0);
 		} else {
-			webpage = resutl[0];
-			webpage.tags = await this.getWebsitesTags(id);
-			webpage = this.parseResultToWebpage(webpage);
+			let res = resutl[0];
+			res.tags = await this.getWebsitesTags(id);
+			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)`, [webpage.id]));
+			if (lastExecution.rowCount >= 1) {
+				res.executionStatus = lastExecution.rows[0].executionstatus;
+				res.executionTime = lastExecution.rows[0].starttime;
+			}
+			webpage = this.parseResultToWebpage(res);
 		}
 		return webpage;
 	}
@@ -110,6 +119,47 @@ export class DatabaseManager {
 		for (let tag of site.tags) {
 			await this.createTag(id, tag);
 		}
+		return result.rowCount;
+	}
+
+	public async getExecutions() {
+		let result = (await this.runQuery('SELECT * FROM execution', [])).rows;
+		let executions: execution[] = [];
+		for (let exec of result) {
+			executions.push(this.parseResultToExecution(exec));
+		}
+		return executions;
+	}
+
+	public async getExecution(id: bigint): Promise<execution> {
+		const params = [id];
+		let result = (await this.runQuery(`SELECT * FROM execution WHERE id = $1`, params)).rows;
+		console.log(result);
+		let execu: execution = Object.assign({}, nullexecution);
+		if (result.length == 0) {
+			execu.id = BigInt(0);
+		} else {
+			execu = this.parseResultToExecution(result[0]);
+		}
+		return execu;
+	}
+
+	//returns id of new execution, 0 if insert failed
+	public async logNewExecution(execution: startingExecution): Promise<bigint> {
+		const params = [execution.recId, execution.executionStatus, execution.startTime, execution.crawledSites];
+		let result = await this.runQuery(`INSERT INTO execution(webpage_id, executionstatus, starttime, crawledsites) VALUES($1, $2, $3, $4) RETURNING id`, params);
+		let count = result.rowCount;
+		if (result.rowCount >= 1) {
+			return result.rows[0].id;
+		} else {
+			return BigInt(0);
+		}
+	}
+
+	//if rowCount <= 1 the execution doesn't exist
+	public async executionUpdate(exec: execution) {
+		const params = [exec.id, exec.executionStatus, exec.endTime, exec.crawledSites]
+		let result = await this.runQuery(`UPDATE execution SET executionstatus = $2, endtime = $3, crawledsites = $4  WHERE id = $1`, params);
 		return result.rowCount;
 	}
 }

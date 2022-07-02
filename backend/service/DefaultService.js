@@ -9,17 +9,19 @@ const { DatabaseManager } = require('../dbservice/databaseManager.ts');
  * returns inline_response_201
  **/
 exports.createExecution = function (body) {
-  return new Promise(function (resolve, reject) {
-    console.log('executions');
+  return new Promise(async function (resolve, reject) {
     var examples = {};
+    let db = DatabaseManager.getManager();
+    let record = await db.getWebsite(body.recordId);
     examples['application/json'] = {
       "success": true,
       "message": "messageCreateExec"
     };
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
+    if (record.id == 0) {
+      reject(404);
     } else {
-      resolve();
+      //TODO call executioner
+      resolve(examples[Object.keys(examples)[0]]);
     }
   });
 }
@@ -43,6 +45,7 @@ exports.createRecord = function (body) {
     };
     console.log(insertedNumber, page.tags.length + 1);
     if (insertedNumber == page.tags.length + 1) {
+      //TODO create new execution from executioner
       resolve(examples[Object.keys(examples)[0]]);
     } else {
       reject(418);
@@ -82,21 +85,18 @@ exports.deleteRecord = function (recID) {
  * returns inline_response_200_3
  **/
 exports.getExecution = function (execID) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
+    let db = DatabaseManager.getManager();
+    const exec = await db.getExecution(execID);
     var examples = {};
     examples['application/json'] = {
       "success": true,
-      "executionStatus": 1,
-      "startTime": "startTime",
-      "id": 0,
-      "endTime": "endTime",
-      "crawledSites": 5,
-      "recId": 6
+      "execution": exec
     };
-    if (Object.keys(examples).length > 0) {
+    if (exec.id > 0) {
       resolve(examples[Object.keys(examples)[0]]);
     } else {
-      resolve();
+      reject(404);
     }
   });
 }
@@ -108,24 +108,13 @@ exports.getExecution = function (execID) {
  * returns inline_response_200_2
  **/
 exports.getExecutions = function () {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
+    let db = DatabaseManager.getManager();
+    const exec = await db.getExecutions();
+
     var examples = {};
     examples['application/json'] = {
-      "executions": [{
-        "executionStatus": 1,
-        "startTime": "startTime",
-        "id": 0,
-        "endTime": "endTime",
-        "crawledSites": 5,
-        "recId": 6
-      }, {
-        "executionStatus": 1,
-        "startTime": "startTime",
-        "id": 0,
-        "endTime": "endTime",
-        "crawledSites": 5,
-        "recId": 6
-      }],
+      "executions": exec,
       "success": true
     };
     if (Object.keys(examples).length > 0) {
@@ -202,9 +191,9 @@ exports.updateRecord = function (body, recID) {
     };
     if (rows == 1) {
       resolve(examples[Object.keys(examples)[0]]);
-    } else if (rows == 0){
+    } else if (rows == 0) {
       reject(404);
-    } else if (rows < 0){
+    } else if (rows < 0) {
       reject(500);
     } else {
       reject(418);
