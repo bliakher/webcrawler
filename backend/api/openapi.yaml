@@ -241,9 +241,9 @@ components:
                 type: array
                 items:
                   type: string
-              lastExecution:
+              lastExecTime:
                 type: string
-              executionStatus:
+              lastExecStatus:
                 type: integer
                 format: int64
             example:
@@ -344,9 +344,9 @@ components:
               type: array
               items:
                 type: string
-            lastExecution:
+            lastExecTime:
               type: string
-            executionStatus:
+            lastExecStatus:
               type: integer
               format: int64
           example:
