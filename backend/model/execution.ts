@@ -8,6 +8,7 @@ export interface execution {
 }
 
 export interface startingExecution {
+    recId : bigint,
     executionStatus : number,
     startTime : Date
     crawledSites : number,

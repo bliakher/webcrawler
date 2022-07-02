@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { ModuleResolutionKind } from 'typescript';
-import { execution, nullexecution } from '../model/execution';
+import { execution, nullexecution, startingExecution } from '../model/execution';
 import { nullpage, webpage } from '../model/webpage';
 import { writeJson } from '../utils/writer';
 
@@ -134,11 +134,11 @@ export class DatabaseManager {
 		return executions;
 	}
 
-	public async getExecution(id: bigint) : Promise<execution> {
+	public async getExecution(id: bigint): Promise<execution> {
 		const params = [id];
 		let result = (await this.runQuery(`SELECT * FROM execution WHERE id = $1`, params)).rows;
 		console.log(result);
-		let execu : execution = Object.assign({}, nullexecution);
+		let execu: execution = Object.assign({}, nullexecution);
 		if (result.length == 0) {
 			execu.id = BigInt(0);
 		} else {
@@ -147,12 +147,23 @@ export class DatabaseManager {
 		return execu;
 	}
 
-	public async logNewExecution(): Promise<bigint> {
-		//TODO
-		return BigInt(0);
+	//returns id of new execution, 0 if insert failed
+	public async logNewExecution(execution: startingExecution): Promise<bigint> {
+		const params = [execution.recId, execution.executionStatus, execution.startTime, execution.crawledSites];
+		let result = await this.runQuery(`INSERT INTO execution(webpage_id, executionstatus, starttime, crawledsites) VALUES($1, $2, $3, $4) RETURNING id`, params);
+		let count = result.rowCount;
+		if (result.rowCount >= 1) {
+			return result.rows[0].id;
+		} else {
+			return BigInt(0);
+		}
 	}
 
-	public async executionEnd() {
-		//TODO
+	//if rowCount <= 1 the execution doesn't exist
+	public async executionUpdate(exec : execution) {
+		const params = [exec.id, exec.executionStatus, exec.endTime, exec.crawledSites]
+		let result = await this.runQuery(`UPDATE execution SET executionstatus = $2, endtime = $3, crawledsites = $4  WHERE id = $1`, params);
+		return result.rowCount;
+		//TODO update pages
 	}
 }
