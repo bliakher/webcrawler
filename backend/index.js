@@ -4,6 +4,21 @@ var path = require('path');
 var http = require('http');
 var cors = require('cors');
 var express = require('express');
+var { graphqlHTTP } = require('express-graphql');
+var { buildSchema } = require('graphql');
+
+var schema = buildSchema(`
+  type Query {
+    hello: String
+  }
+`);
+
+// The root provides a resolver function for each API endpoint
+var root = {
+    hello: () => {
+        return 'Hello world!';
+    },
+};
 
 var oas3Tools = require('oas3-tools');
 var serverPort = 8080;
@@ -20,6 +35,11 @@ var openApiApp = expressAppConfig.getApp();
 
 var app = express()
 app.use(/.*/, cors());
+app.use('/graphql', graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true,
+}));
 
 for (let i = 2; i < openApiApp._router.stack.length; i++) {
     app._router.stack.push(openApiApp._router.stack[i])
