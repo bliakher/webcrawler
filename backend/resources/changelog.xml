@@ -222,9 +222,53 @@
         </preConditions>
 
         <renameColumn tableName="nodes" oldColumnName="executionid" newColumnName="webpage_id" />
-        <dropForeignKeyConstraint baseTableName="nodes" constraintName="owner_record_fk" />
+        <dropForeignKeyConstraint baseTableName="nodes" constraintName="owner_exec_fk" />
         <addForeignKeyConstraint baseTableName="nodes" baseColumnNames="webpage_id" constraintName="owner_record_fk" referencedTableName="webpage" referencedColumnNames="id" onDelete="CASCADE" />
 
+    </changeSet>
+
+    <changeSet id="example node data" author="jp">
+        <insert tableName="nodes">
+            <column name="url" value="http://example.org"></column>
+            <column name="crawl_time" value="10"></column>
+            <column name="title" value="page A"></column>
+            <column name="webpage_id" value="1"></column>
+        </insert>
+
+        <insert tableName="nodes">
+            <column name="url" value="http://example.org/found_first"></column>
+            <column name="crawl_time" value="2"></column>
+            <column name="title" value="page B"></column>
+            <column name="webpage_id" value="1"></column>
+        </insert>
+
+        <insert tableName="nodes">
+            <column name="url" value="http://example.org/found_second"></column>
+            <column name="crawl_time" value="1"></column>
+            <column name="title" value="page C"></column>
+            <column name="webpage_id" value="1"></column>
+        </insert>
+
+        <insert tableName="nodeLinks">
+            <column name="node_id_from" value="1"></column>
+            <column name="node_id_to" value="2"></column>
+        </insert>
+        <insert tableName="nodeLinks">
+            <column name="node_id_from" value="1"></column>
+            <column name="node_id_to" value="3"></column>
+        </insert>
+        <insert tableName="nodeLinks">
+            <column name="node_id_from" value="2"></column>
+            <column name="node_id_to" value="3"></column>
+        </insert>
+        <insert tableName="nodeLinks">
+            <column name="node_id_from" value="3"></column>
+            <column name="node_id_to" value="2"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="rename links table" author="jp">
+        <renameTable oldTableName="nodeLinks" newTableName="nodelinks" />
     </changeSet>
 
 </databaseChangeLog>

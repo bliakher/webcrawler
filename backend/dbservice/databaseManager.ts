@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { execution, nullexecution, startingExecution } from '../model/execution';
 import { nullpage, webpage } from '../model/webpage';
+import { parseResultToExecution, parseResultToNode, parseResultToWebpage } from './databaseUtils';
 
 export class DatabaseManager {
 
@@ -25,30 +26,7 @@ export class DatabaseManager {
 		return DatabaseManager.instance;
 	}
 
-	private parseResultToWebpage(result: any): webpage {
-		return {
-			id: result.id,
-			regEx: result.regex,
-			label: result.label,
-			periodicity: result.periodicity,
-			tags: result.tags,
-			active: result.active,
-			url: result.url,
-			lastExecStatus : result.executionStatus,
-			lastExecTime: result.executionTime
-		}
-	}
-
-	private parseResultToExecution(result: any): execution {
-		return {
-			id: result.id,
-			recId: result.webpage_id,
-			executionStatus: result.executionstatus,
-			startTime: result.starttime,
-			endTime: result.endtime,
-			crawledSites: result.crawledsites,
-		}
-	}
+	
 
 	private async getWebsitesTags(id: bigint): Promise<string[]> {
 		return ((await this.runQuery(`SELECT value FROM tags WHERE webpage_id = ${id} `, [])).rows).map(val => val.value);
@@ -64,7 +42,7 @@ export class DatabaseManager {
 				row.executionStatus = lastExecution.rows[0].executionstatus;
 				row.executionTime = lastExecution.rows[0].starttime;
 			}
-			pages.push(this.parseResultToWebpage(row));
+			pages.push(parseResultToWebpage(row));
 		}
 		return pages;
 	}
@@ -82,7 +60,7 @@ export class DatabaseManager {
 				res.executionStatus = lastExecution.rows[0].executionstatus;
 				res.executionTime = lastExecution.rows[0].starttime;
 			}
-			webpage = this.parseResultToWebpage(res);
+			webpage = parseResultToWebpage(res);
 		}
 		return webpage;
 	}
@@ -126,7 +104,7 @@ export class DatabaseManager {
 		let result = (await this.runQuery('SELECT * FROM execution', [])).rows;
 		let executions: execution[] = [];
 		for (let exec of result) {
-			executions.push(this.parseResultToExecution(exec));
+			executions.push(parseResultToExecution(exec));
 		}
 		return executions;
 	}
@@ -139,7 +117,7 @@ export class DatabaseManager {
 		if (result.length == 0) {
 			execu.id = BigInt(0);
 		} else {
-			execu = this.parseResultToExecution(result[0]);
+			execu = parseResultToExecution(result[0]);
 		}
 		return execu;
 	}
@@ -161,5 +139,22 @@ export class DatabaseManager {
 		const params = [exec.id, exec.executionStatus, exec.endTime, exec.crawledSites]
 		let result = await this.runQuery(`UPDATE execution SET executionstatus = $2, endtime = $3, crawledsites = $4  WHERE id = $1`, params);
 		return result.rowCount;
+	}
+
+	private async getNeighbours(nodeId : bigint) {
+		const params = [nodeId];
+		let result = (await this.runQuery(`SELECT node_id_to FROM nodelinks WHERE node_id_from = $1`, params)).rows;
+		return result.map((e) => {return e.node_id_to;});
+	}
+
+	public async getCrawledSitesForGraph(recordID : bigint) {
+		const params = [recordID];
+		let result = (await this.runQuery(`SELECT * FROM nodes WHERE webpage_id = $1`, params)).rows;
+		let nodes = result.map((e) => {return parseResultToNode(e)});
+		for (let node of nodes) {
+			let neighbours = await this.getNeighbours(node.id);
+			node.links = neighbours;
+		}
+		return nodes;
 	}
 }
