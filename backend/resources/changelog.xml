@@ -216,4 +216,15 @@
 
     </changeSet>
 
+    <changeSet id="reference nodes to webpages" author="jp">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="owner_exec_fk" />
+        </preConditions>
+
+        <renameColumn tableName="nodes" oldColumnName="executionid" newColumnName="webpage_id" />
+        <dropForeignKeyConstraint baseTableName="nodes" constraintName="owner_record_fk" />
+        <addForeignKeyConstraint baseTableName="nodes" baseColumnNames="webpage_id" constraintName="owner_record_fk" referencedTableName="webpage" referencedColumnNames="id" onDelete="CASCADE" />
+
+    </changeSet>
+
 </databaseChangeLog>
