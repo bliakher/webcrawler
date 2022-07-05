@@ -116,7 +116,6 @@ export class DatabaseManager {
 	public async getExecution(id: bigint): Promise<execution> {
 		const params = [id];
 		let result = (await this.runQuery(`SELECT * FROM execution WHERE id = $1`, params)).rows;
-		console.log(result);
 		let execu: execution = Object.assign({}, nullexecution);
 		if (result.length == 0) {
 			execu.id = BigInt(0);

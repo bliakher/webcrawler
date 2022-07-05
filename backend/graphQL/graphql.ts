@@ -83,7 +83,6 @@ async function getGraph(id: bigint) {
   let mapOfPages = Object.fromEntries(pages.map((page, index) => [page.identifier.toString(), page]));
   let result: graphQLNode[] = [];
   for (let node of nodes) {
-    console.log(node);
     let neighbours: node[] = [];
     if (node.links) {
       for (let id of node.links) {
@@ -92,7 +91,6 @@ async function getGraph(id: bigint) {
     }
     result.push(nodeToGrapQL(node, neighbours, mapOfPages));
   }
-  console.log(result);
   return result;
 }
 
