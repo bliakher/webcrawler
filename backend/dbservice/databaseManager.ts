@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { execution, nullexecution, startingExecution } from '../model/execution';
 import { nullpage, webpage } from '../model/webpage';
+import { parseResultToExecution, parseResultToNode, parseResultToWebpage } from './databaseUtils';
 
 export class DatabaseManager {
 
@@ -25,30 +26,7 @@ export class DatabaseManager {
 		return DatabaseManager.instance;
 	}
 
-	private parseResultToWebpage(result: any): webpage {
-		return {
-			id: result.id,
-			regEx: result.regex,
-			label: result.label,
-			periodicity: result.periodicity,
-			tags: result.tags,
-			active: result.active,
-			url: result.url,
-			lastExecStatus : result.executionStatus,
-			lastExecTime: result.executionTime
-		}
-	}
 
-	private parseResultToExecution(result: any): execution {
-		return {
-			id: result.id,
-			recId: result.webpage_id,
-			executionStatus: result.executionstatus,
-			startTime: result.starttime,
-			endTime: result.endtime,
-			crawledSites: result.crawledsites,
-		}
-	}
 
 	private async getWebsitesTags(id: bigint): Promise<string[]> {
 		return ((await this.runQuery(`SELECT value FROM tags WHERE webpage_id = ${id} `, [])).rows).map(val => val.value);
@@ -59,12 +37,12 @@ export class DatabaseManager {
 		let pages = [];
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
-			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)` , [row.id]));
+			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)`, [row.id]));
 			if (lastExecution.rowCount >= 1) {
 				row.executionStatus = lastExecution.rows[0].executionstatus;
 				row.executionTime = lastExecution.rows[0].starttime;
 			}
-			pages.push(this.parseResultToWebpage(row));
+			pages.push(parseResultToWebpage(row));
 		}
 		return pages;
 	}
@@ -82,11 +60,12 @@ export class DatabaseManager {
 				res.executionStatus = lastExecution.rows[0].executionstatus;
 				res.executionTime = lastExecution.rows[0].starttime;
 			}
-			webpage = this.parseResultToWebpage(res);
+			webpage = parseResultToWebpage(res);
 		}
 		return webpage;
 	}
 
+	//creating website and its new tags
 	public async createWebsite(site: webpage) {
 		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
 		let result = await this.runQuery(`INSERT INTO webpage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
@@ -106,12 +85,14 @@ export class DatabaseManager {
 		return result.rowCount;
 	}
 
+	//
 	public async deleteWebsite(id: bigint) {
 		const params = [id];
 		let result = await this.runQuery('DELETE FROM webpage WHERE id = $1', params);
 		return result.rowCount;
 	}
 
+	//
 	public async updateWebsite(id: bigint, site: webpage) {
 		const params = [id, site.url, site.regEx, site.periodicity, site.label, site.active];
 		let result = (await this.runQuery(`UPDATE webpage SET url = $2, regex = $3, periodicity = $4, label = $5, active = $6 WHERE id = $1`, params))
@@ -122,11 +103,12 @@ export class DatabaseManager {
 		return result.rowCount;
 	}
 
+	//
 	public async getExecutions() {
 		let result = (await this.runQuery('SELECT * FROM execution', [])).rows;
 		let executions: execution[] = [];
 		for (let exec of result) {
-			executions.push(this.parseResultToExecution(exec));
+			executions.push(parseResultToExecution(exec));
 		}
 		return executions;
 	}
@@ -134,16 +116,34 @@ export class DatabaseManager {
 	public async getExecution(id: bigint): Promise<execution> {
 		const params = [id];
 		let result = (await this.runQuery(`SELECT * FROM execution WHERE id = $1`, params)).rows;
-		console.log(result);
 		let execu: execution = Object.assign({}, nullexecution);
 		if (result.length == 0) {
 			execu.id = BigInt(0);
 		} else {
-			execu = this.parseResultToExecution(result[0]);
+			execu = parseResultToExecution(result[0]);
 		}
 		return execu;
 	}
 
+	//get graph from database for said webpage
+	private async getNeighbours(nodeId: bigint) {
+		const params = [nodeId];
+		let result = (await this.runQuery(`SELECT node_id_to FROM nodelinks WHERE node_id_from = $1`, params)).rows;
+		return result.map((e) => { return e.node_id_to; });
+	}
+
+	public async getCrawledSitesForGraph(recordID: bigint) {
+		const params = [recordID];
+		let result = (await this.runQuery(`SELECT * FROM nodes WHERE webpage_id = $1`, params)).rows;
+		let nodes = result.map((e) => { return parseResultToNode(e) });
+		for (let node of nodes) {
+			let neighbours = await this.getNeighbours(node.id);
+			node.links = neighbours;
+		}
+		return nodes;
+	}
+
+	//log and save every executions
 	//returns id of new execution, 0 if insert failed
 	public async logNewExecution(execution: startingExecution): Promise<bigint> {
 		const params = [execution.recId, execution.executionStatus, execution.startTime, execution.crawledSites];
