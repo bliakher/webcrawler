@@ -181,6 +181,7 @@ export class DatabaseManager {
 	}
 
 	// links in node -> position of other node in array
+	//return number of inserted items into database (nodes + all links)
 	public async storeNodeGraph(record: webpage, nodes: node[]): Promise<number> {
 		const deleteParams = [record.id];
 		let result = await this.runQuery(`DELETE FROM node WHERE webpage_id = $1`, deleteParams);
@@ -192,7 +193,7 @@ export class DatabaseManager {
 				node.id = result.rows[0].id;
 				insertedItems += 1;
 			} else {
-				//TODO throw error
+				throw new Error('one node couldnt be saved');
 			}
 		}
 
