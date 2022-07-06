@@ -1,5 +1,8 @@
+import { query } from 'express';
 import { Pool } from 'pg';
+import { nodeModuleNameResolver } from 'typescript';
 import { execution, nullexecution, startingExecution } from '../model/execution';
+import { node } from '../model/node';
 import { nullpage, webpage } from '../model/webpage';
 import { parseResultToExecution, parseResultToNode, parseResultToWebpage } from './databaseUtils';
 
@@ -148,7 +151,6 @@ export class DatabaseManager {
 	public async logNewExecution(execution: startingExecution): Promise<bigint> {
 		const params = [execution.recId, execution.executionStatus, execution.startTime, execution.crawledSites];
 		let result = await this.runQuery(`INSERT INTO execution(webpage_id, executionstatus, starttime, crawledsites) VALUES($1, $2, $3, $4) RETURNING id`, params);
-		let count = result.rowCount;
 		if (result.rowCount >= 1) {
 			return result.rows[0].id;
 		} else {
@@ -161,5 +163,43 @@ export class DatabaseManager {
 		const params = [exec.id, exec.executionStatus, exec.endTime, exec.crawledSites]
 		let result = await this.runQuery(`UPDATE execution SET executionstatus = $2, endtime = $3, crawledsites = $4  WHERE id = $1`, params);
 		return result.rowCount;
+	}
+
+	private prepareInsertLinksQuery(query: string, depth: number, maxDepth: number): string {
+		if (depth === maxDepth) {
+			return query;
+		}
+		return this.prepareInsertLinksQuery(`${query}, ($1, $${depth + 1})`, depth + 1, maxDepth);
+	}
+
+	private async insertNodeLinks(id : bigint, node : node, insertedItems : number) : Promise<number> {
+		let query = this.prepareInsertLinksQuery(`INSERT INTO nodelinks(node_id_from, node_id_to) VALUES($1, $2)`, 2, node.links.length + 1);
+		let queryParams = [id].concat(node.links.map(id => { return BigInt(id) }));
+		console.log(query, queryParams);
+		let result = await this.runQuery(query, queryParams);
+		return insertedItems + result.rowCount;
+	}
+
+	// links in node -> position of other node in array
+	public async storeNodeGraph(record: webpage, nodes: node[]): Promise<number> {
+		const deleteParams = [record.id];
+		let result = await this.runQuery(`DELETE FROM node WHERE webpage_id = $1`, deleteParams);
+		let insertedItems = 0;
+		for (let node of nodes) {
+			let params = [node.url, node.crawlTime, node.title, record.id];
+			let result = await this.runQuery(`INSERT INTO nodes(url, crawl_time, title, webpage_id) VALUES($1, $2, $3, $4) RETURNING id`, params);
+			if (result.rowCount >= 1) {
+				node.id = result.rows[0].id;
+				insertedItems += 1;
+			} else {
+				//TODO throw error
+			}
+		}
+
+		for (let node of nodes) {
+			insertedItems = await this.insertNodeLinks(record.id, node, insertedItems);
+		}
+
+		return insertedItems;
 	}
 }
