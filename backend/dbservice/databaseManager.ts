@@ -68,6 +68,20 @@ export class DatabaseManager {
 		return webpage;
 	}
 
+	public async getWebsitesWithLatestExecutionStop(): Promise<webpage[]> {
+		let result = (await this.runQuery('SELECT * FROM webpage', [])).rows;
+		let pages = [];
+		for (let row of result) {
+			row.tags = await this.getWebsitesTags(row.id);
+			let lastExecution = (await this.runQuery(`SELECT endtime FROM execution WHERE webpage_id = $1 AND endtime = (SELECT MAX(e.endtime) from execution AS e WHERE e.webpage_id = $1)`, [row.id]));
+			if (lastExecution.rowCount >= 1) {
+				row.executionTime = lastExecution.rows[0].endtime;
+			}
+			pages.push(parseResultToWebpage(row));
+		}
+		return pages;
+	}
+
 	//creating website and its new tags
 	public async createWebsite(site: webpage) {
 		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
@@ -172,7 +186,7 @@ export class DatabaseManager {
 		return this.prepareInsertLinksQuery(`${query}, ($1, $${depth + 1})`, depth + 1, maxDepth);
 	}
 
-	private async insertNodeLinks(id : bigint, node : node, insertedItems : number) : Promise<number> {
+	private async insertNodeLinks(id: bigint, node: node, insertedItems: number): Promise<number> {
 		let query = this.prepareInsertLinksQuery(`INSERT INTO nodelinks(node_id_from, node_id_to) VALUES($1, $2)`, 2, node.links.length + 1);
 		let queryParams = [id].concat(node.links.map(id => { return BigInt(id) }));
 		console.log(query, queryParams);
@@ -202,5 +216,10 @@ export class DatabaseManager {
 		}
 
 		return insertedItems;
+	}
+
+	public async removeUnfinishedExecutions() {
+		let result = await this.runQuery(`DELETE FROM execution WHERE endtime IS NULL`, []);
+		return result.rowCount;
 	}
 }

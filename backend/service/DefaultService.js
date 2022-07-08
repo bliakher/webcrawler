@@ -1,5 +1,6 @@
 'use strict';
 
+const { Executor } = require('../crawling/executor');
 const { DatabaseManager } = require('../dbservice/databaseManager.ts');
 
 /**
@@ -15,12 +16,13 @@ exports.createExecution = function (body) {
     let record = await db.getWebsite(body.recordId);
     examples['application/json'] = {
       "success": true,
-      "message": "messageCreateExec"
+      "message": "successfully created"
     };
     if (record.id == 0) {
       reject(404);
     } else {
-      //TODO call executioner
+      let executor = Executor.getExecutor();
+      executor.addImmidiateExecution(record);
       resolve(examples[Object.keys(examples)[0]]);
     }
   });
