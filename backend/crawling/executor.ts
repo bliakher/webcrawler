@@ -41,7 +41,7 @@ export class Executor {
     private async startImmidiateExecution(record: webpage) {
         let exec : execution = await this.logNewExecution(record);
         //TODO spawn thread with crawler
-        console.log(`request for starting execution now has been processed ${record}`);
+        console.log(`request for starting execution now has been processed ${record.id}`);
     }
 
     private async planExecution(record: webpage) {

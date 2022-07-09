@@ -22,7 +22,7 @@ exports.createExecution = function (body) {
       reject(404);
     } else {
       let executor = Executor.getExecutor();
-      executor.addImmidiateExecution(record);
+      executor.startImmidiateExecution(record);
       resolve(examples[Object.keys(examples)[0]]);
     }
   });
