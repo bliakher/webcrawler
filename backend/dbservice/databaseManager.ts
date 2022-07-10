@@ -1,5 +1,6 @@
 import { query } from 'express';
 import { Pool } from 'pg';
+import format from 'pg-format';
 import { nodeModuleNameResolver } from 'typescript';
 import { execution, nullexecution, startingExecution } from '../model/execution';
 import { node } from '../model/node';
@@ -186,12 +187,24 @@ export class DatabaseManager {
 		return this.prepareInsertLinksQuery(`${query}, ($1, $${depth + 1})`, depth + 1, maxDepth);
 	}
 
-	private async insertNodeLinks(id: bigint, node: node, insertedItems: number, nodes : node[]): Promise<number> {
-		let query = this.prepareInsertLinksQuery(`INSERT INTO nodelinks(node_id_from, node_id_to) VALUES($1, $2)`, 2, node.links.length + 1);
-		let queryParams = [node.id].concat(node.links.map(id => { return nodes[id].id }));
-		console.log(query, queryParams);
-		let result = await this.runQuery(query, queryParams);
-		return insertedItems + result.rowCount;
+	private async insertNodeLinks(id: bigint, node: node, insertedItems: number, nodes: node[]): Promise<number> {
+		if (node.links) {
+			let values = node.links.map(id => { return [node.id, nodes[id].id] });
+			console.log(`values`, values);
+			if (values.length > 0) {
+				let result = await this.runQuery(format('INSERT INTO nodelinks(node_id_from, node_id_to) VALUES %L', values), []);
+				return insertedItems + result.rowCount;
+			} else {
+				return insertedItems;
+			}
+
+			/*let query = this.prepareInsertLinksQuery(`INSERT INTO nodelinks(node_id_from, node_id_to) VALUES($1, $2)`, 2, node.links.length + 1);
+			let queryParams = [node.id].concat(node.links.map(id => { return nodes[id].id }));
+			console.log(query, queryParams);
+			let result = await this.runQuery(query, queryParams);*/
+		} else {
+			return 0;
+		}
 	}
 
 	// links in node -> position of other node in array

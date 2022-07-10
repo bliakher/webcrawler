@@ -291,4 +291,26 @@
 
     </changeSet>
 
+    <changeSet id="tested crawl long run" author="jp">
+        <delete tableName="webpage"></delete>
+
+        <insert tableName="webpage">
+            <column name="url" value="http://gymspit.cz"></column>
+            <column name="regex" value=".*gymspit.cz.*"></column>
+            <column name="periodicity" value="60"></column>
+            <column name="label" value="gymspit"></column>
+            <column name="active" value="true"></column>
+        </insert>
+
+        <insert tableName="webpage">
+            <column name="url" value="https://d3s.mff.cuni.cz/students"></column>
+            <column name="regex" value=".*d3s.mff.cuni.cz/[students|teaching].*"></column>
+            <column name="periodicity" value="120"></column>
+            <column name="label" value="d3s"></column>
+            <column name="active" value="true"></column>
+        </insert>
+
+
+    </changeSet>
+
 </databaseChangeLog>

@@ -3,12 +3,14 @@
 import { node } from "../model/node";
 import { execution } from "../model/execution";
 import { webpage } from "../model/webpage";
+import { crawlerData } from "../model/crawlerData";
+import { expose } from "threads";
 
 const axios = require('axios')
 const cheerio = require('cheerio')
 
 // TODO odstranit console.log()
-async function crawl(record: webpage, execution: execution, resolve: Function, reject: Function) {
+export async function crawl(record: webpage, execution: execution) : Promise<crawlerData> {
 
 	const url = cleanUrl(record.url)
 	const regex = new RegExp(record.regEx)
@@ -43,6 +45,7 @@ async function crawl(record: webpage, execution: execution, resolve: Function, r
 		node.links = Array.from(new Set(node.links))
 	}
 	
+	return {nodes : nodes, record : record, exec : execution};
 }
 
 async function getContent(url: string) {
@@ -78,11 +81,13 @@ function cleanUrl(url: string): string {
 	return url.split('#')[0].replace(/\/$/, '');
 }
 
+expose(crawl);
+
 
 
 // tohle je pro testovani z terminalu
 
-const args: string[] = process.argv.slice(2)
+/*const args: string[] = process.argv.slice(2)
 if (args.length !== 2) {
 	console.log('wrong amount of arguments, 2 were expected')
 }
@@ -94,3 +99,4 @@ else {
 
 	crawl(record, execution, () => {}, () => {})
 }
+*/

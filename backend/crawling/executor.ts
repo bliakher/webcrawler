@@ -15,7 +15,7 @@ export class Executor {
     private pool: Pool<any>;
 
     private constructor() {
-        this.pool = Pool(() => spawn(new Worker('./mock_crawler')));
+        this.pool = Pool(() => spawn(new Worker('./crawler')));
         this.db = DatabaseManager.getManager();
         console.log("loading");
         this.db.removeUnfinishedExecutions().then(() => {
@@ -35,12 +35,17 @@ export class Executor {
     private async loadAndPlanAllExecutionsOnStart() {
         this.records = await this.db.getWebsitesWithLatestExecutionStop();
         for (let record of this.records) {
-            let nextStart = new Date(Date.parse(record.lastExecTime) + (record.periodicity * 60 * 1000));
-            console.log(nextStart);
-            if (nextStart.getTime() <= Date.now()) {
-                this.startImmidiateExecution(record, false);
+            if (!record.lastExecTime || record.lastExecTime === "") {
+                this.startImmidiateExecution(record, true);
             } else {
-                this.planExecution(record, nextStart);
+
+                let nextStart = new Date(Date.parse(record.lastExecTime) + (record.periodicity * 60 * 1000));
+                console.log(nextStart);
+                if (nextStart.getTime() <= Date.now()) {
+                    this.startImmidiateExecution(record, false);
+                } else {
+                    this.planExecution(record, nextStart);
+                }
             }
         }
     }
@@ -55,6 +60,9 @@ export class Executor {
             if (!fromPost) {
                 this.planExecution(record, new Date(Date.now() + (record.periodicity * 60 * 1000)));
             }
+        }).catch((error) => {
+            console.log(error);
+            //TODO log error execution and fail
         });
     }
 
