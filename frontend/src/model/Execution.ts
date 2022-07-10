@@ -1,5 +1,5 @@
 import { updateExternalModuleReference } from "typescript";
-import { IExecution } from "../api/model";
+import { IExecution } from "../api/rest/model";
 
 export enum ExecutionStatus {
     Waiting,

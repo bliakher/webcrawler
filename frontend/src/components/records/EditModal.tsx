@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Col, FloatingLabel, Form, FormGroup, Modal, Row } from "react-bootstrap";
-import { Service } from "../../api/service";
+import { ServiceRest } from "../../api/rest/service";
 import { Periodicity, RecordData, RecordEditable } from "../../model/Record";
 import { PeriodicitySelector } from "./PeriodicitySelector";
 

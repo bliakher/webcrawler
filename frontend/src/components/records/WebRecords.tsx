@@ -4,7 +4,7 @@ import { ExecutionData } from '../../model/Execution';
 import { RecordData, RecordEditable } from '../../model/Record';
 import { MyPagination } from '../Pagination';
 import { GraphVisualization } from '../GraphVisualization';
-import { Service } from '../../api/service';
+import { ServiceRest } from '../../api/rest/service';
 import { Loader } from '../Loader';
 import { RecordTable } from './RecordsTable';
 import { EditModal } from './EditModal';
@@ -61,7 +61,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleNew = this.handleNew.bind(this);
     }
     async componentDidMount() {
-        this.records = await Service.getRecords();
+        this.records = await ServiceRest.getRecords();
         var error = this.records === null;
         this.setState({loaded: true, error: error});
     }
@@ -93,14 +93,14 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     handleEditSave(updatedRecord: RecordEditable, recordId: number) {
         // TODO: show update/create result
         if (this.state.isNew) {
-            Service.createRecord(updatedRecord);
+            ServiceRest.createRecord(updatedRecord);
         } else {
-            Service.updateRecord(recordId, updatedRecord);
+            ServiceRest.updateRecord(recordId, updatedRecord);
         }
     }
     handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
-        Service.deleteRecord(recordId);
+        ServiceRest.deleteRecord(recordId);
     }
     async handleNew() {
         var emptyRecord = RecordData.createEmptyRecord()
