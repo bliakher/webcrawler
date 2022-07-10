@@ -3,15 +3,15 @@ import * as d3 from "d3";
 const graph = {
     nodes: [
         {
-            "title": "page A",
+            "name": "page A",
             "url": "http://example.org",
         },
         {
-            "title": "page B",
+            "name": "page B",
             "url": "http://example.org/found_first",
         },
         {
-            "title": "page C",
+            "name": "page C",
             "url": "http://example.org/found_second",
         }
     ],
@@ -55,16 +55,21 @@ const ForceDirectedGraph = (graph, svg) => {
         .attr("stroke-width", d => 1)
         .style("stroke", "black");
 
-    var circles = svg
+    var nodes = svg
         .append("g")
-        .selectAll("circle")
+        .selectAll("g")
         .data(graph.nodes)
-        // .enter()
-        // .append("circle")
-        .join("circle")
+        .enter()
+        .append("g");
+
+    var circles = nodes.append("circle")
         .attr("r", 5)
         .attr("fill", d => "red")
         .call(drag(simulation));
+
+    var texts = nodes.append("text")
+        .text(d => d.name);
+
 
     function ticked() {
         lines
@@ -73,9 +78,9 @@ const ForceDirectedGraph = (graph, svg) => {
             .attr("x2", d => d.target.x)
             .attr("y2", d => d.target.y);
 
-        circles
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y);
+        nodes
+            .attr("transform", d => "translate(" + d.x + ", " + d.y + ")");
+        
     }
 
     function drag(simulation) {    
