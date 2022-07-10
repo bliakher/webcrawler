@@ -186,9 +186,9 @@ export class DatabaseManager {
 		return this.prepareInsertLinksQuery(`${query}, ($1, $${depth + 1})`, depth + 1, maxDepth);
 	}
 
-	private async insertNodeLinks(id: bigint, node: node, insertedItems: number): Promise<number> {
+	private async insertNodeLinks(id: bigint, node: node, insertedItems: number, nodes : node[]): Promise<number> {
 		let query = this.prepareInsertLinksQuery(`INSERT INTO nodelinks(node_id_from, node_id_to) VALUES($1, $2)`, 2, node.links.length + 1);
-		let queryParams = [id].concat(node.links.map(id => { return BigInt(id) }));
+		let queryParams = [node.id].concat(node.links.map(id => { return nodes[id].id }));
 		console.log(query, queryParams);
 		let result = await this.runQuery(query, queryParams);
 		return insertedItems + result.rowCount;
@@ -198,7 +198,7 @@ export class DatabaseManager {
 	//return number of inserted items into database (nodes + all links)
 	public async storeNodeGraph(record: webpage, nodes: node[]): Promise<number> {
 		const deleteParams = [record.id];
-		let result = await this.runQuery(`DELETE FROM node WHERE webpage_id = $1`, deleteParams);
+		let result = await this.runQuery(`DELETE FROM nodes WHERE webpage_id = $1`, deleteParams);
 		let insertedItems = 0;
 		for (let node of nodes) {
 			let params = [node.url, node.crawlTime, node.title, record.id];
@@ -211,8 +211,10 @@ export class DatabaseManager {
 			}
 		}
 
+		console.log(nodes);
+
 		for (let node of nodes) {
-			insertedItems = await this.insertNodeLinks(record.id, node, insertedItems);
+			insertedItems = await this.insertNodeLinks(record.id, node, insertedItems, nodes);
 		}
 
 		return insertedItems;

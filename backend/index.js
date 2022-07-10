@@ -8,6 +8,7 @@ var { graphqlHTTP } = require('express-graphql');
 
 var oas3Tools = require('oas3-tools');
 const { schema } = require('./graphQL/graphql');
+const { Executor } = require('./crawling/executor');
 var serverPort = 8080;
 
 // swaggerRouter configuration
@@ -26,6 +27,8 @@ app.use('/graphql', graphqlHTTP({
     schema: schema,
     graphiql: true,
 }));
+
+let executor = Executor.getExecutor();
 
 for (let i = 2; i < openApiApp._router.stack.length; i++) {
     app._router.stack.push(openApiApp._router.stack[i])
