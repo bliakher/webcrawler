@@ -1,13 +1,8 @@
 import { expose } from "threads";
+import { crawlerData } from "../model/crawlerData";
 import { execution } from "../model/execution";
 import { node } from "../model/node";
 import { webpage } from "../model/webpage";
-
-export interface return_object {
-    nodes : node[],
-    record : webpage,
-    exec : execution
-}
 
 function sleep(ms : number) {
     return new Promise((resolve) => {
@@ -15,7 +10,7 @@ function sleep(ms : number) {
     });
   }
 
-export async function crawl(record: webpage, exec: execution) : Promise<return_object> {
+export async function crawl(record: webpage, exec: execution) : Promise<crawlerData> {
 
     console.log(`starting crawler ${record.id}`);
 

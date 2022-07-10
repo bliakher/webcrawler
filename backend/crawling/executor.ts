@@ -3,8 +3,8 @@ import { DatabaseManager } from "../dbservice/databaseManager";
 import { execution, startingExecution } from "../model/execution";
 import { node } from "../model/node";
 import { webpage } from "../model/webpage";
-import { return_object } from "./mock_crawler";
 import { scheduleJob } from "node-schedule";
+import { crawlerData } from "../model/crawlerData";
 
 export class Executor {
     private static instance: Executor = null;
@@ -49,12 +49,10 @@ export class Executor {
         console.log(`running execution for record ${record.id}`);
         let exec: execution = await this.logNewExecution(record);
         const task = this.pool.queue(async crawler => crawler(record, exec));
-        task.then((result: return_object) => {
+        task.then((result: crawlerData) => {
             this.resolveCrawledGraph(result.nodes, result.record, result.exec);
 
-            console.log(`before planning`);
             if (!fromPost) {
-                console.log(`in planning`);
                 this.planExecution(record, new Date(Date.now() + (record.periodicity * 60 * 1000)));
             }
         });
