@@ -38,7 +38,7 @@ const ForceDirectedGraph = (graph, svg) => {
     var height = svg.attr("height");
     var simulation = d3.forceSimulation(graph.nodes)
         .force("link",
-            d3.forceLink(graph.links).id(d => d.url))
+            d3.forceLink(graph.links).distance(100).id(d => d.url))
         .force("charge",
             d3.forceManyBody())
         .force("center", 
@@ -53,7 +53,7 @@ const ForceDirectedGraph = (graph, svg) => {
         return d;
     })
     .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 15)
+    .attr("refX", 20)
     .attr("refY", 0)
     .attr("markerWidth", 10)
     .attr("markerHeight", 10)
@@ -81,7 +81,7 @@ const ForceDirectedGraph = (graph, svg) => {
         .append("g");
 
     var circles = nodes.append("circle")
-        .attr("r", 5)
+        .attr("r", 10)
         .attr("fill", d => "red")
         .call(drag(simulation));
 
