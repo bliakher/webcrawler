@@ -36,9 +36,9 @@ const queryType: GraphQLObjectType = new GraphQLObjectType({
     },
     nodes: {
       type: new GraphQLList(nodeType),
-      args: { "ID": { type: GraphQLID } },
+      args: { "websites": { type: new GraphQLList(GraphQLID)} },
       resolve: async (obj, args) => {
-        return getGraph(args.ID);
+        return getGraph(args.websites);
       },
     }
   }
@@ -75,7 +75,7 @@ async function getWebpages() {
   return webpageToGraphQL(pages);
 }
 
-async function getGraph(id: bigint) {
+async function getGraph(id: bigint[]) {
   let db = DatabaseManager.getManager();
   let nodes = await db.getCrawledSitesForGraph(id);
   let pages = webpageToGraphQL(await db.getWebsites());

@@ -132,9 +132,9 @@ export class DatabaseManager {
 		return result.map((e) => { return e.node_id_to; });
 	}
 
-	public async getCrawledSitesForGraph(recordID: bigint) {
+	public async getCrawledSitesForGraph(recordID: bigint[]) {
 		const params = [recordID];
-		let result = (await this.runQuery(`SELECT * FROM nodes WHERE webpage_id = $1`, params)).rows;
+		let result = (await this.runQuery(`SELECT * FROM nodes WHERE webpage_id = ANY($1::int[])`, params)).rows;
 		let nodes = result.map((e) => { return parseResultToNode(e) });
 		for (let node of nodes) {
 			let neighbours = await this.getNeighbours(node.id);
