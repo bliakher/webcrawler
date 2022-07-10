@@ -18,7 +18,7 @@ const graph = {
     links: [
         {
             source: "http://example.org",
-            target: "http://example.org/found_first"
+            target: "http://example.org/found_first",
         },
         {
             source: "http://example.org",
@@ -45,15 +45,33 @@ const ForceDirectedGraph = (graph, svg) => {
             d3.forceCenter(width / 2, height / 2))
         .on("tick", ticked);
 
+    svg.append("defs").selectAll("marker")
+    .data(["dominating"])
+    .enter().append("marker")
+    .attr('markerUnits', 'userSpaceOnUse')
+    .attr("id", function (d) {
+        return d;
+    })
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 15)
+    .attr("refY", 0)
+    .attr("markerWidth", 10)
+    .attr("markerHeight", 10)
+    .attr("orient", "auto-start-reverse")
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", "black");
+
     var lines = svg
         .append("g")
         .selectAll("line")
         .data(graph.links)
-        // .enter()
-        // .append("line")
         .join("line")
         .attr("stroke-width", d => 1)
-        .style("stroke", "black");
+        .style("stroke", "black")
+        .attr("marker-end", function(d) {
+            if(JSON.stringify(d.target) !== JSON.stringify(d.source))
+               return "url(#dominating)"});
 
     var nodes = svg
         .append("g")
