@@ -10,7 +10,7 @@ const axios = require('axios')
 const cheerio = require('cheerio')
 
 // TODO odstranit console.log()
-export async function crawl(record: webpage, execution: execution) : Promise<crawlerData> {
+export async function crawl(record: webpage, execution: execution, fromPost : boolean) : Promise<crawlerData> {
 
 	const url = cleanUrl(record.url)
 	const regex = new RegExp(record.regEx)
@@ -45,7 +45,7 @@ export async function crawl(record: webpage, execution: execution) : Promise<cra
 		node.links = Array.from(new Set(node.links))
 	}
 	
-	return {nodes : nodes, record : record, exec : execution};
+	return {nodes : nodes, record : record, exec : execution, fromPost : fromPost};
 }
 
 async function getContent(url: string) {

@@ -36,7 +36,7 @@ export class Executor {
         this.records = await this.db.getWebsitesWithLatestExecutionStop();
         for (let record of this.records) {
             if (!record.lastExecTime || record.lastExecTime === "") {
-                this.startImmidiateExecution(record, true);
+                this.startImmidiateExecution(record, false);
             } else {
 
                 let nextStart = new Date(Date.parse(record.lastExecTime) + (record.periodicity * 60 * 1000));
@@ -50,19 +50,21 @@ export class Executor {
         }
     }
 
-    private async startImmidiateExecution(record: webpage, fromPost: boolean = true) {
+    private async startImmidiateExecution(record: webpage, fromPost: boolean) {
         console.log(`running execution for record ${record.id}`);
         let exec: execution = await this.logNewExecution(record);
-        const task = this.pool.queue(async crawler => crawler(record, exec));
+        const task = this.pool.queue(async crawler => crawler(record, exec, fromPost));
         task.then((result: crawlerData) => {
             this.resolveCrawledGraph(result.nodes, result.record, result.exec);
 
-            if (!fromPost) {
+            if (!result.fromPost) {
                 this.planExecution(record, new Date(Date.now() + (record.periodicity * 60 * 1000)));
             }
         }).catch((error) => {
             console.log(error);
-            //TODO log error execution and fail
+			let db = DatabaseManager.getManager();
+			exec.executionStatus = 3;
+			db.executionUpdate(exec);
         });
     }
 
@@ -90,7 +92,7 @@ export class Executor {
         console.log(nodes);
         exec.crawledSites = nodes.length;
         exec.endTime = new Date(Date.now());
-        exec.executionStatus = 1;
+        exec.executionStatus = 2;
         db.executionUpdate(exec).then((rows) => {
             if (rows < 1) {
                 console.log(`error updating execution ${exec.id}`);
