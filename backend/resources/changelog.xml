@@ -271,4 +271,46 @@
         <renameTable oldTableName="nodeLinks" newTableName="nodelinks" />
     </changeSet>
 
+    <changeSet id="tested periods" author="jp">
+        <update tableName="webpage">
+            <column name="periodicity" value="1"></column>
+            <where>id=1</where>
+        </update>
+        <update tableName="webpage">
+            <column name="periodicity" value="2"></column>
+            <where>id=2</where>
+        </update>
+        <update tableName="webpage">
+            <column name="periodicity" value="3"></column>
+            <where>id=3</where>
+        </update>
+        <update tableName="webpage">
+            <column name="periodicity" value="4"></column>
+            <where>id=4</where>
+        </update>
+
+    </changeSet>
+
+    <changeSet id="tested crawl long run" author="jp">
+        <delete tableName="webpage"></delete>
+
+        <insert tableName="webpage">
+            <column name="url" value="http://gymspit.cz"></column>
+            <column name="regex" value=".*gymspit.cz.*"></column>
+            <column name="periodicity" value="60"></column>
+            <column name="label" value="gymspit"></column>
+            <column name="active" value="true"></column>
+        </insert>
+
+        <insert tableName="webpage">
+            <column name="url" value="https://d3s.mff.cuni.cz/students"></column>
+            <column name="regex" value=".*d3s.mff.cuni.cz/[students|teaching].*"></column>
+            <column name="periodicity" value="120"></column>
+            <column name="label" value="d3s"></column>
+            <column name="active" value="true"></column>
+        </insert>
+
+
+    </changeSet>
+
 </databaseChangeLog>
