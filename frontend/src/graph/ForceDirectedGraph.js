@@ -5,14 +5,22 @@ const graph = {
         {
             "name": "page A",
             "url": "http://example.org",
+            "crawled": true
         },
         {
             "name": "page B",
             "url": "http://example.org/found_first",
+            "crawled": true
         },
         {
             "name": "page C",
             "url": "http://example.org/found_second",
+            "crawled": true
+        },
+        {
+            "name": "Not crawled",
+            "url": "http://example.org/not_crawled",
+            "crawled": false
         }
     ],
     links: [
@@ -27,6 +35,10 @@ const graph = {
         {
             source: "http://example.org/found_first",
             target: "http://example.org/found_second"
+        },
+        {
+            source: "http://example.org/found_first",
+            target: "http://example.org/not_crawled"
         },
 
     ]
@@ -82,7 +94,7 @@ const ForceDirectedGraph = (graph, svg) => {
 
     var circles = nodes.append("circle")
         .attr("r", 10)
-        .attr("fill", d => "red")
+        .attr("fill", d => d.crawled ? "red" : "grey")
         .call(drag(simulation));
 
     var texts = nodes.append("text")
