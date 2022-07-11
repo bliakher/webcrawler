@@ -7,7 +7,7 @@ export interface D3Data {
 export interface D3Node {
     id: string;
     name: string;
-    label: string;
+    crawled: boolean;
 }
 
 export interface D3Link {

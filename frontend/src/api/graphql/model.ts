@@ -8,4 +8,5 @@ export interface INode {
     url: string;
     links: { url: string }[];
     owner: { identifier: number }; // TODO: id string or num?
+    crawlTime: number;
 }
