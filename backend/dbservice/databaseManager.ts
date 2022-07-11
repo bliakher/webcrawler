@@ -84,17 +84,20 @@ export class DatabaseManager {
 	}
 
 	//creating website and its new tags
-	public async createWebsite(site: webpage) {
+	public async createWebsite(site: webpage) : Promise<webpage> {
 		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
 		let result = await this.runQuery(`INSERT INTO webpage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
-		let count = result.rowCount;
-		if (count >= 1) {
+		if (result.rows.length > 0) {
 			const id = result.rows[0].id;
+			console.log(`inserted record ${id}`);
 			for (const tag of site.tags) {
-				count += await this.createTag(id, tag);
+				await this.createTag(id, tag);
 			}
+			site.id = id;
+			return site;
+		} else {
+			return nullpage;
 		}
-		return count;
 	}
 
 	private async createTag(id: bigint, tag: string) {
