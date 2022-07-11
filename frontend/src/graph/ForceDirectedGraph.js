@@ -4,22 +4,22 @@ const graph = {
     nodes: [
         {
             "name": "page A",
-            "url": "http://example.org",
+            "id": "http://example.org",
             "crawled": true
         },
         {
             "name": "page B",
-            "url": "http://example.org/found_first",
+            "id": "http://example.org/found_first",
             "crawled": true
         },
         {
             "name": "page C",
-            "url": "http://example.org/found_second",
+            "id": "http://example.org/found_second",
             "crawled": true
         },
         {
             "name": "Not crawled",
-            "url": "http://example.org/not_crawled",
+            "id": "http://example.org/not_crawled",
             "crawled": false
         }
     ],
@@ -50,7 +50,7 @@ const ForceDirectedGraph = (graph, svg) => {
     var height = svg.attr("height");
     var simulation = d3.forceSimulation(graph.nodes)
         .force("link",
-            d3.forceLink(graph.links).distance(100).id(d => d.url))
+            d3.forceLink(graph.links).distance(100).id(d => d.id))
         .force("charge",
             d3.forceManyBody())
         .force("center", 
