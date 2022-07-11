@@ -21,6 +21,8 @@ var options = {
 var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
 var openApiApp = expressAppConfig.getApp();
 
+//let executor = Executor.getExecutor();
+
 var app = express()
 app.use(/.*/, cors());
 app.use('/graphql', graphqlHTTP({
