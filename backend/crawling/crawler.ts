@@ -8,44 +8,73 @@ import { expose } from "threads";
 
 const axios = require('axios')
 const cheerio = require('cheerio')
+const { performance } = require('perf_hooks');
 
-// TODO odstranit console.log()
+
 export async function crawl(record: webpage, execution: execution) : Promise<crawlerData> {
 
-	const url = cleanUrl(record.url)
+	const url = record.url
 	const regex = new RegExp(record.regEx)
-	const nodes: node[] = [<node>{'url': new URL(url).href}]
+	const nodes: node[] = [<node>{ url }]
 
 	const crawledMap = new Map<string, number>()
-	crawledMap.set(url, 0)
+	crawledMap.set(shortenUrl(url), 0)
 
 	for (let node of nodes) {
 
+		// console.log('crawling ' + node.url)
+
 		if (!regex.test(node.url)) {
-			console.log('regex ' + regex + ' failed for ' + node.url)
+			// console.log('does not match regex')
 			continue
 		}
 		
+		const t1 = performance.now()
+
 		const content = await getContent(node.url)
 		node.title = getTitle(content)
 		node.links = []
 
 		const links = getLinks(content, node.url)
-		links.forEach(link => {
+		for (let link of links) {
 
-			if (crawledMap.has(link)) {
-				node.links.push(crawledMap.get(link))
+			const shortLink = shortenUrl(link)
+
+			if (crawledMap.has(shortLink)) {
+				const index = crawledMap.get(shortLink)
+				if (index !== -1) {
+					node.links.push(index)
+				}
 			}
 			else {
-				crawledMap.set(link, nodes.length)
-				node.links.push(nodes.length)
-				nodes.push(<node>{'url': link})
+				if (await checkContentType(link)) {
+					crawledMap.set(shortLink, nodes.length)
+					node.links.push(nodes.length)
+					nodes.push(<node>{'url': link})
+				}
+				else {
+					crawledMap.set(shortLink, -1)
+				}
 			}
-		})
+		}
+		const t2 = performance.now()
+
 		node.links = Array.from(new Set(node.links))
+		node.crawlTime = t2 - t1
 	}
-	
+
 	return {nodes : nodes, record : record, exec : execution};
+}
+
+async function checkContentType(url: string) {
+	
+	try {
+		const { headers } = await axios.head(url)
+		return headers['content-type'].startsWith('text/html')
+	}
+	catch (e) {
+		return false
+	}
 }
 
 async function getContent(url: string) {
@@ -67,7 +96,7 @@ function getLinks(content: string, baseUrl: string) {
 	$('a').each((i: number, link: any) => {
 		const relativeLink = link.attribs.href
 		const absoluteLink = new URL(relativeLink, baseUrl).href
-		links.push(cleanUrl(absoluteLink))
+		links.push(absoluteLink)
 	});
 	return links
 }
@@ -77,8 +106,11 @@ function getTitle(content: string) {
 	return $('title').text()
 }
 
-function cleanUrl(url: string): string {
-	return url.split('#')[0].replace(/\/$/, '');
+function shortenUrl(url: string): string {
+	return url
+		.replace(/^https?:\/\/(www\.)?/, '')
+		.split('#')[0]
+		.replace(/\/$/, '')
 }
 
 expose(crawl);
@@ -86,8 +118,8 @@ expose(crawl);
 
 
 // tohle je pro testovani z terminalu
-
-/*const args: string[] = process.argv.slice(2)
+/*
+const args: string[] = process.argv.slice(2)
 if (args.length !== 2) {
 	console.log('wrong amount of arguments, 2 were expected')
 }
@@ -97,6 +129,6 @@ else {
 	const record = <webpage>{url: url, regEx: regexp}
 	const execution = <execution>{}
 
-	crawl(record, execution, () => {}, () => {})
+	crawl(record, execution)
 }
 */
