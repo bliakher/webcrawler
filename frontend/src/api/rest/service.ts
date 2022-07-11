@@ -1,5 +1,5 @@
-import { ExecutionData } from '../model/Execution';
-import { RecordData, RecordEditable } from '../model/Record';
+import { ExecutionData } from '../../model/Execution';
+import { RecordData, RecordEditable } from '../../model/Record';
 import { IRecord, IExecution, IRecordUpdate } from './model';
 import { testRecords } from './testRecords';
 import { testExecutions } from './testExecutions';
@@ -12,35 +12,9 @@ export interface APIResponse<T> {
 var records = testRecords.map(dataObj => new RecordData(dataObj));
 var counter = 7;
 
-const url = "http://localhost:8080";
+const url = "http://nasold.piroutek.eu:4001";
 
-export class Service {
-
-    // private static async fetchAPI<T>(path: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: object)
-    //     : Promise<APIResponse<T>> {
-
-    //         try {
-    //             const response = await fetch(path, {
-    //                 method: method,
-    //                 headers: {
-    //                     'Accept': 'application/json',
-    //                     'Content-Type': 'application/json'
-    //                 },
-    //                 body: JSON.stringify(body)
-    //             });
-    //             const parsed = await response.json();
-    //             return parsed;
-    //         } catch (error) {
-    //             return { success: false, data: undefined };
-    //         }
-    // }
-
-    private static getHeaders() {
-        return  {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        };
-    }
+export class ServiceRest {
 
     private static encodeBody(bodyObj: object) {
         return JSON.stringify(bodyObj);

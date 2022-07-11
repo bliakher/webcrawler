@@ -11,7 +11,7 @@ const cheerio = require('cheerio')
 const { performance } = require('perf_hooks');
 
 
-export async function crawl(record: webpage, execution: execution) : Promise<crawlerData> {
+export async function crawl(record: webpage, execution: execution, fromPost : boolean) : Promise<crawlerData> {
 
 	const url = record.url
 	const regex = new RegExp(record.regEx)
@@ -21,7 +21,6 @@ export async function crawl(record: webpage, execution: execution) : Promise<cra
 	crawledMap.set(shortenUrl(url), 0)
 
 	for (let node of nodes) {
-
 		// console.log('crawling ' + node.url)
 
 		if (!regex.test(node.url)) {
@@ -63,7 +62,7 @@ export async function crawl(record: webpage, execution: execution) : Promise<cra
 		node.crawlTime = t2 - t1
 	}
 
-	return {nodes : nodes, record : record, exec : execution};
+	return {nodes : nodes, record : record, exec : execution, fromPost : fromPost};
 }
 
 async function checkContentType(url: string) {

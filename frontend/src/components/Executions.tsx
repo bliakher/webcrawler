@@ -1,7 +1,7 @@
 import { stat } from 'fs';
 import React from 'react';
 import { Col, Form, Row, Table } from 'react-bootstrap';
-import { Service } from '../api/service';
+import { ServiceRest } from '../api/rest/service';
 import { ExecutionData } from '../model/Execution';
 import { RecordData } from '../model/Record';
 import { Loader } from './Loader';
@@ -35,8 +35,8 @@ export class Executions extends React.Component<{}, ExecutionsState> {
     }
 
     async componentDidMount() {
-        this.executions = await Service.getExecutions();
-        this.records = await Service.getRecords();
+        this.executions = await ServiceRest.getExecutions();
+        this.records = await ServiceRest.getRecords();
         var error = this.executions === null || this.records === null;
         if (this.records) {
             for (var record of this.records) {

@@ -5,5 +5,6 @@ import { webpage } from "./webpage";
 export interface crawlerData {
     nodes : node[],
     record : webpage,
-    exec : execution
+    exec : execution,
+	fromPost : boolean,
 }

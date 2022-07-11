@@ -1,3 +1,4 @@
+import { end } from 'cheerio/lib/api/traversing';
 import { query } from 'express';
 import { Pool } from 'pg';
 import format from 'pg-format';
@@ -51,7 +52,12 @@ export class DatabaseManager {
 		return pages;
 	}
 
-	public async getWebsite(id: bigint): Promise<webpage> {
+	public async getWebsite(id: bigint, endTime : boolean = false): Promise<webpage> {
+		let timeColumn = "starttime";
+		if (endTime) {
+			timeColumn = "endtime";
+		}
+
 		let resutl = (await this.runQuery(`SELECT * FROM webpage WHERE id = $1`, [id])).rows;
 		let webpage: webpage = Object.assign({}, nullpage);
 		if (resutl.length == 0) {
@@ -59,10 +65,11 @@ export class DatabaseManager {
 		} else {
 			let res = resutl[0];
 			res.tags = await this.getWebsitesTags(id);
-			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)`, [webpage.id]));
+			console.log(res);
+			let lastExecution = await this.runQuery(`SELECT executionstatus, ${timeColumn} as time FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)`, [res.id]);
 			if (lastExecution.rowCount >= 1) {
 				res.executionStatus = lastExecution.rows[0].executionstatus;
-				res.executionTime = lastExecution.rows[0].starttime;
+				res.executionTime = lastExecution.rows[0].time;
 			}
 			webpage = parseResultToWebpage(res);
 		}
@@ -84,17 +91,20 @@ export class DatabaseManager {
 	}
 
 	//creating website and its new tags
-	public async createWebsite(site: webpage) {
+	public async createWebsite(site: webpage) : Promise<webpage> {
 		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
 		let result = await this.runQuery(`INSERT INTO webpage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
-		let count = result.rowCount;
-		if (count >= 1) {
+		if (result.rows.length > 0) {
 			const id = result.rows[0].id;
+			console.log(`inserted record ${id}`);
 			for (const tag of site.tags) {
-				count += await this.createTag(id, tag);
+				await this.createTag(id, tag);
 			}
+			site.id = id;
+			return site;
+		} else {
+			return nullpage;
 		}
-		return count;
 	}
 
 	private async createTag(id: bigint, tag: string) {

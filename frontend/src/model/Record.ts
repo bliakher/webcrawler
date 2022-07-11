@@ -1,4 +1,4 @@
-import { IRecord } from '../api/model'; 
+import { IRecord } from '../api/rest/model'; 
 import { ExecutionStatus, ExecutionData } from './Execution';
 
 export class RecordData {
