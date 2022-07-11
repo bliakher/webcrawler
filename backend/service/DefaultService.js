@@ -72,6 +72,8 @@ exports.deleteRecord = function (recID) {
 			"message": "successfully deleted"
 		};
 		if (deletedRows >= 1) {
+			let executor = Executor.getExecutor();
+			executor.stopExecutions(recID);
 			resolve(examples[Object.keys(examples)[0]]);
 		} else {
 			reject(404);
@@ -192,6 +194,8 @@ exports.updateRecord = function (body, recID) {
 			"message": "messageUpdate"
 		};
 		if (rows == 1) {
+			let executor = Executor.getExecutor();
+			executor.updateRecord(recID);
 			resolve(examples[Object.keys(examples)[0]]);
 		} else if (rows == 0) {
 			reject(404);
