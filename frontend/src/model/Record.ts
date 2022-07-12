@@ -13,7 +13,7 @@ export class RecordData {
     lastExecTime: Date;
     lastExecStatus: ExecutionStatus;
     constructor(recordObj: IRecord) {
-        this.id = recordObj.id;
+        this.id = parseInt(recordObj.id);
         this.url = recordObj.url;
         this.regEx = recordObj.regEx;
         this.periodicity = new Periodicity(recordObj.periodicity);
@@ -41,7 +41,7 @@ export class RecordData {
     static createEmptyRecord(): RecordData {
         //TODO: ??? how is created in the database
         return new RecordData({
-            id: -1, // invalid id
+            id: "", // invalid id
             url: "",
             label: "",
             regEx: "",

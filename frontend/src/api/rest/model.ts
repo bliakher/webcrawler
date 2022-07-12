@@ -1,6 +1,6 @@
 
 export interface IRecord {
-    id: number;
+    id: string;
     url: string;
     regEx: string;
     periodicity: number;

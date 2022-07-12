@@ -2,7 +2,7 @@ import { IRecord } from './model';
 
 export const testRecords: IRecord[] = [
     {
-        id: 5,
+        id: '5',
         label: "E",
         url: "httpa",
         tags: ["tag1", "tag2"],
@@ -13,7 +13,7 @@ export const testRecords: IRecord[] = [
         lastExecStatus: 2
     },
     {
-        id: 1,
+        id: '1',
         label: "A",
         url: "httpb",
         tags: ["tag1", "tag2"],
@@ -24,7 +24,7 @@ export const testRecords: IRecord[] = [
         lastExecStatus: 1
     },
     {
-        id: 3,
+        id: '3',
         label: "C",
         url: "httpc",
         tags: ["tag2"],
@@ -35,7 +35,7 @@ export const testRecords: IRecord[] = [
         lastExecStatus: 0
     },
     {
-        id: 2,
+        id: '2',
         label: "B",
         url: "httpd",
         tags: ["tag1"],
@@ -47,7 +47,7 @@ export const testRecords: IRecord[] = [
     },
     
     {
-        id: 6,
+        id: '6',
         label: "F",
         url: "httpe",
         tags: ["tag1"],
@@ -58,7 +58,7 @@ export const testRecords: IRecord[] = [
         lastExecStatus: 3
     },
     {
-        id: 4,
+        id: '4',
         label: "D",
         url: "httpf",
         tags: [],
