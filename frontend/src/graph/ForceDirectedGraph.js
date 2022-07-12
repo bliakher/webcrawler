@@ -44,7 +44,7 @@ const graph = {
     ]
 };
 
-const ForceDirectedGraph = (graph, svg) => {
+const ForceDirectedGraph = (graph, svg, showNodeCallback) => {
     console.log("force");
     var width = svg.attr("width");
     var height = svg.attr("height");
@@ -91,6 +91,7 @@ const ForceDirectedGraph = (graph, svg) => {
         .data(graph.nodes)
         .enter()
         .append("g");
+        // .on('dblclick', d => showNodeCallback(d));
 
     var circles = nodes.append("circle")
         .attr("r", 10)
@@ -99,6 +100,8 @@ const ForceDirectedGraph = (graph, svg) => {
 
     var texts = nodes.append("text")
         .text(d => d.name);
+
+    circles.on('dblclick', (event, data) => { showNodeCallback(data) });
 
 
     function ticked() {

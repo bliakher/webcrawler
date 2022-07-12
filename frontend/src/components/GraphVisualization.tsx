@@ -4,7 +4,9 @@ import { graph, ForceDirectedGraph } from '../graph/ForceDirectedGraph';
 import { RecordData } from '../model/Record';
 import { ServiceGraphql } from '../api/graphql/service';
 import { GraphTransfom } from '../graph/GraphTransform';
-import { Form, Row } from 'react-bootstrap';
+import { Card, Col, Form, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
+import { D3Node } from '../graph/VisualizationData';
+import CardHeader from 'react-bootstrap/esm/CardHeader';
 
 
 interface VisualizationProps {
@@ -14,6 +16,7 @@ interface VisualizationProps {
 
 interface VisualizationState {
     showDomain: boolean
+    nodeDetail: D3Node | null;
 }
 
 export class GraphVisualization extends React.Component<VisualizationProps, VisualizationState> {
@@ -26,8 +29,9 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         this.svgContainer = React.createRef();
         this.svgRendered = false;
         this.dataTransform = null;
-        this.state = { showDomain: false }
+        this.state = { showDomain: false, nodeDetail: null }
         this.handleSwitch = this.handleSwitch.bind(this);
+        this.handleShowDetail = this.handleShowDetail.bind(this);
     }
 
     async componentDidMount() {
@@ -50,15 +54,14 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         if (this.dataTransform) {
             this.removeVisualization();
             var websiteData = this.dataTransform.getWebsiteData();
-            ForceDirectedGraph(websiteData, d3.select(this.svgContainer.current))
+            ForceDirectedGraph(websiteData, d3.select(this.svgContainer.current), this.handleShowDetail)
         }
-
     }
     showDomain() {
         if (this.dataTransform) {
             this.removeVisualization();
             var domainData = this.dataTransform.getDomainData();
-            ForceDirectedGraph(domainData, d3.select(this.svgContainer.current))
+            ForceDirectedGraph(domainData, d3.select(this.svgContainer.current), this.handleShowDetail)
         }
     }
 
@@ -71,6 +74,10 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         }
         this.setState({showDomain: newShowDomain});
     }
+
+    handleShowDetail(node: D3Node) {
+        this.setState({nodeDetail: node});
+    }
     render() {
         return (
             <>
@@ -81,6 +88,10 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
                 <Form className="m-2">
                     <Form.Check type="switch" label="Show domains only" onChange={this.handleSwitch}/>
                 </Form>
+                
+                {this.state.nodeDetail !== null && (
+                    <NodeInfo node={this.state.nodeDetail} />
+                ) }
 
                 <Row className="justify-content-md-center">
                     <svg    id= "visualization"
@@ -94,4 +105,39 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
 
         );
     }
+}
+
+interface NodeInfoProps {
+    node: D3Node;
+}
+
+const NodeInfo = (props: NodeInfoProps) => {
+
+    return (
+        <Row>
+            <Col className="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 m-2">
+                <Card>
+                    <CardHeader><div className="fw-bold">Node information</div></CardHeader>
+                    <ListGroup variant="flush">
+                        <ListGroupItem>
+                            <div className="fw-bold">Node:</div> {props.node.name}
+                        </ListGroupItem>
+                        <ListGroupItem>
+                            <div className="fw-bold">URL:</div> {props.node.id}
+                        </ListGroupItem>
+                        {props.node.crawled && (
+                            <>
+                            <ListGroupItem>
+                                <div className="fw-bold">Crawl time:</div> {props.node.crawlTime}
+                            </ListGroupItem>
+                            <ListGroupItem>
+                                <div className="fw-bold">Web records:</div>
+                            </ListGroupItem>
+                            </>
+                        )}
+                    </ListGroup>
+                </Card>
+            </Col>
+        </Row>
+    );
 }
