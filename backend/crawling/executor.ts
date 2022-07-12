@@ -100,7 +100,7 @@ export class Executor {
 		let exec: startingExecution = {
 			recId: record.id,
 			crawledSites: 0,
-			executionStatus: 1,
+			executionStatus: 0,
 			startTime: new Date(Date.now())
 		};
 		let execId = await this.db.logNewExecution(exec);

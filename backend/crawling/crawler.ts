@@ -5,6 +5,7 @@ import { execution } from "../model/execution";
 import { webpage } from "../model/webpage";
 import { crawlerData } from "../model/crawlerData";
 import { expose } from "threads";
+import { DatabaseManager } from "../dbservice/databaseManager";
 
 const axios = require('axios')
 const cheerio = require('cheerio')
@@ -12,6 +13,7 @@ const { performance } = require('perf_hooks');
 
 
 export async function crawl(record: webpage, execution: execution, fromPost : boolean) : Promise<crawlerData> {
+	updateExecutionStatus(execution);
 
 	const url = record.url
 	const regex = new RegExp(record.regEx)
@@ -110,6 +112,12 @@ function shortenUrl(url: string): string {
 		.replace(/^https?:\/\/(www\.)?/, '')
 		.split('#')[0]
 		.replace(/\/$/, '')
+}
+
+function updateExecutionStatus(exec : execution) {
+	exec.executionStatus = 1;
+	let db = DatabaseManager.getManager();
+	db.executionUpdate(exec);
 }
 
 expose(crawl);
