@@ -40,8 +40,12 @@ export class GraphTransfom {
     }
 
     private getDomain(url: string) {
-        var parsed = /\/{1,3}([^\/]+)\//.exec(url);
-        return parsed ? parsed[1] : "";
+        var parsed = /\/{1,3}([^\/]+)\/*/.exec(url);
+        if (parsed) {
+            return parsed[1];
+        }
+        throw new Error("can't parse url " + url);
+        // return parsed ? parsed[1] : "";
     }
 
     private createD3Data(inputNodes: Node[], useTitle: boolean = true) : D3Data {
