@@ -59,7 +59,7 @@ export async function crawl(record: webpage, execution: execution, fromPost : bo
 		const t2 = performance.now()
 
 		node.links = Array.from(new Set(node.links))
-		node.crawlTime = t2 - t1
+		node.crawlTime = Math.floor(t2 - t1);
 	}
 
 	return {nodes : nodes, record : record, exec : execution, fromPost : fromPost};
