@@ -150,7 +150,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     renderFilterForm() {
         return (
             <Form onSubmit={this.handleFilterOn}>
-                <h4>Filter by:</h4>
+                <h5>Filter by:</h5>
                 <Form.Group >
                     <Form.Label>URL</Form.Label>
                     <Form.Control type="text" onChange={this.handleChangeFilterUrl} placeholder="http://example.com" />                        
@@ -179,7 +179,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     renderSortForm() {
         return (
             <div  className="m-2">
-                <h4>Sort records</h4>
+                <h5>Sort records:</h5>
                 <Button onClick={this.handleSortByUrl} className="m-2">
                     {this.state.sortBy.url? "Cancel sort by URL" : "Sort by URL"}
                 </Button>
@@ -193,15 +193,15 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     renderVisualization() {
         if (this.state.checkedRecords.size === 0) return null;
         var button = (
-            <Button onClick={this.handleVisualize}>
+            <Button onClick={this.handleVisualize} className="m-3">
                 {this.state.visualizationDisplayed ? "Hide visualization" : "Display visualization" }
             </Button>
         );
-        if (this.state.visualizationDisplayed) {
+        if (this.state.visualizationDisplayed && this.records) {
             return (
                 <>
                     { button }
-                    <GraphVisualization records={Array.from(this.state.checkedRecords.values())} />
+                    <GraphVisualization checkedRecords={Array.from(this.state.checkedRecords.values())} records={this.records} />
                 </>
             );
         }
@@ -222,13 +222,22 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                 <>
                     { this.renderHeader() }
                     <Row className="justify-content-md-center">
-                        <Col className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5 d-flex p-2">
+                        <Col className="col-12 col-sm-12 col-md-4 col-lg-3 col-xl-3 col-xxl-3 d-flex p-2">
                             { this.renderFilterForm() }
                         </Col>
-                        <Col className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5 d-flex p-2">
+                        <Col className="col-12 col-sm-12 col-md-4 col-lg-3 col-xl-3 col-xxl-3 d-flex p-2">
                             { this.renderSortForm() }
                         </Col>
+                        <Col className="col-12 col-sm-12 col-md-4 col-lg-3 col-xl-3 col-xxl-3 d-flex p-2">
+                            <div className='m-2'>
+                            <h5>Add new record: </h5>
+                            <Button className="m-2" onClick={this.handleNew}>
+                                New record
+                            </Button>
+                            </div>
+                        </Col>
                     </Row>
+
                     <RecordTable records={recordsSliced} editCallback={this.handleEdit} deleteCallback={this.handleDelete}
                                 checkCallback={this.handleRowCheck}/>
                     <Row className="justify-content-md-center text-center">
@@ -236,11 +245,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                             <MyPagination currentPage={this.state.curPage} totalCount={records.length} pageSize={this.PAGE_SIZE}
                                 onPageChange={this.handlePageChange} siblingCount={1} />
                         </Col>
-                        <Col className="m-2">
-                            <Button className="m-2" onClick={this.handleNew}>
-                                New record
-                            </Button>
-                        </Col>
+                        
                     </Row>
                     
                     { this.renderVisualization() }
