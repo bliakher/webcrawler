@@ -8,6 +8,13 @@ export interface D3Node {
     id: string;
     name: string;
     crawled: boolean;
+    crawlTime: number;
+    owners: Owner[];
+}
+
+export interface Owner {
+    id: number;
+    label: string;
 }
 
 export interface D3Link {

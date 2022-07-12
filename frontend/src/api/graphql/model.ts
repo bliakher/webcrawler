@@ -23,13 +23,13 @@ export class Node {
     title: string | null;
     url: string;
     links: { url: string }[];
-    ownerId: number; 
+    owners: number[]; 
     crawlTime: number;
     constructor(nodeObj?: INode) {
         this.title = nodeObj ? nodeObj.title : "";
         this.url = nodeObj ? nodeObj.url : "";
         this.links = nodeObj ? nodeObj.links : [];
-        this.ownerId = nodeObj ? parseInt(nodeObj.owner.identifier) : 0;
+        this.owners = nodeObj ? [parseInt(nodeObj.owner.identifier)] : [];
         this.crawlTime = nodeObj ? parseInt(nodeObj.crawlTime) : 0;
     }
 
@@ -38,7 +38,7 @@ export class Node {
         copy.title = this.title;
         copy.url = this.url;
         copy.links = [...this.links];
-        copy.ownerId = this.ownerId;
+        copy.owners = this.owners;
         copy.crawlTime = this.crawlTime;
         return copy;
     }

@@ -1,6 +1,6 @@
 import { ILink, INode, Node } from "../api/graphql/model";
 import { RecordData } from "../model/Record";
-import { D3Data, D3Link, D3Node } from "./VisualizationData";
+import { D3Data, D3Link, D3Node, Owner } from "./VisualizationData";
 
 export class GraphTransfom {
 
@@ -19,12 +19,12 @@ export class GraphTransfom {
         for (let node of data) {
             let duplicate = uniqueNodes.get(node.url);
             if (duplicate) {
-                let nodeRecord = this.findRecord(node.ownerId);
-                let duplicateRecord = this.findRecord(duplicate.ownerId);
+                let nodeRecord = this.findRecord(node.owners[0]);
+                let duplicateRecord = this.findRecord(duplicate.owners[0]);
                 if (!nodeRecord || !duplicateRecord) throw new Error("Incorrect owner id")
                 if (nodeRecord.lastExecTime <= duplicateRecord.lastExecTime) {
                     // node that is already in the map is newer so we leave its data
-                    // we don't change the map
+                    duplicate.owners.push(node.owners[0]); // add owner to list
                     continue;
                 }
             } 
@@ -34,9 +34,12 @@ export class GraphTransfom {
         return Array.from(uniqueNodes.values());
     }
 
-    private findRecord(id: number): RecordData | null {
+    private findRecord(id: number): RecordData {
         var found = this.records.filter(record => record.id === id);
-        return found.length > 0 ? found[0] : null;
+        if (found.length > 0) {
+            return found[0];
+        }
+        throw new Error("invalid owner id, cannot find record " + id);
     }
 
     private getDomain(url: string) {
@@ -48,6 +51,13 @@ export class GraphTransfom {
         // return parsed ? parsed[1] : "";
     }
 
+    private getOwners(ownerIds: number[]): Owner[] {
+        return ownerIds.map(id => {
+            var record = this.findRecord(id);
+            return {id: record.id, label: record.label};
+        })
+    }
+
     private createD3Data(inputNodes: Node[], useTitle: boolean = true) : D3Data {
         let nodes: D3Node[] = [];
         let links: D3Link[] = []
@@ -57,7 +67,9 @@ export class GraphTransfom {
                 name: useTitle? 
                     (value.title ? value.title : value.url) // if page has title, use title
                     : value.url, // use domain name
-                crawled: value.crawlTime !== 0 // crawlTime == 0 -> not crawled
+                crawled: value.crawlTime !== 0, // crawlTime == 0 -> not crawled
+                crawlTime: value.crawlTime,
+                owners: this.getOwners(value.owners)
             }
             nodes.push(node);
             value.links.forEach(link => {
