@@ -1,26 +1,26 @@
-import { INode } from "../api/graphql/model";
+import { ILink, INode, Node } from "../api/graphql/model";
 import { RecordData } from "../model/Record";
 import { D3Data, D3Link, D3Node } from "./VisualizationData";
 
 export class GraphTransfom {
 
-    data: INode[];
-    filtered: INode[];
+    data: Node[];
+    filtered: Node[];
     records: RecordData[];
 
-    constructor(data: INode[], records: RecordData[]) {
+    constructor(data: Node[], records: RecordData[]) {
         this.data = data;
         this.filtered = this.filterDuplicateNodes(data);
         this.records = records;
     }
 
-    private filterDuplicateNodes(data: INode[]): INode[] {
-        let uniqueNodes = new Map<string, INode>();
+    private filterDuplicateNodes(data: Node[]): Node[] {
+        let uniqueNodes = new Map<string, Node>();
         for (let node of data) {
             let duplicate = uniqueNodes.get(node.url);
             if (duplicate) {
-                let nodeRecord = this.findRecord(node.owner.identifier);
-                let duplicateRecord = this.findRecord(duplicate.owner.identifier);
+                let nodeRecord = this.findRecord(node.ownerId);
+                let duplicateRecord = this.findRecord(duplicate.ownerId);
                 if (!nodeRecord || !duplicateRecord) throw new Error("Incorrect owner id")
                 if (nodeRecord.lastExecTime <= duplicateRecord.lastExecTime) {
                     // node that is already in the map is newer so we leave its data
@@ -44,7 +44,7 @@ export class GraphTransfom {
         return parsed ? parsed[1] : "";
     }
 
-    private createD3Data(inputNodes: INode[], useTitle: boolean = true) : D3Data {
+    private createD3Data(inputNodes: Node[], useTitle: boolean = true) : D3Data {
         let nodes: D3Node[] = [];
         let links: D3Link[] = []
         inputNodes.forEach((value) => {
@@ -52,7 +52,7 @@ export class GraphTransfom {
                 id: value.url, // id is url
                 name: useTitle? 
                     (value.title ? value.title : value.url) // if page has title, use title
-                    : this.getDomain(value.url), // use domain name
+                    : value.url, // use domain name
                 crawled: value.crawlTime !== 0 // crawlTime == 0 -> not crawled
             }
             nodes.push(node);
@@ -69,15 +69,23 @@ export class GraphTransfom {
         return this.createD3Data(this.filtered, true);
     }
 
+    transformLinksToDomain(links: ILink[]): ILink[] {
+        return links.map(link => ({ url: this.getDomain(link.url)}));
+    }
+
     getDomainData() {
-        var domains = new Map<string, INode>();
+        var domains = new Map<string, Node>();
         for (var node of this.filtered) {
             var domainName = this.getDomain(node.url);
-            var domain = domains.get(domainName);
-            if (domain) {
-                domain.links.push(...node.links); // add all links
+            var domainLinks = this.transformLinksToDomain(node.links);
+            var domainNode = domains.get(domainName);
+            if (domainNode) {
+                domainNode.links.push(...domainLinks); // add all links
             } else {
-                domains.set(domainName, node)
+                domainNode = node.copy();
+                domainNode.url = this.getDomain(domainNode.url);
+                domainNode.links = domainLinks;
+                domains.set(domainName, domainNode)
             }
         }
         var domainList = Array.from(domains.values());
