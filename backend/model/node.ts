@@ -1,7 +1,7 @@
 import { graphQLWebPage, webpage } from "./webpage";
 
 export interface node {
-    id : bigint,
+    id? : bigint,
     url : string,
     crawlTime : number,
     title : string,

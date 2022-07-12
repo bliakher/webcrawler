@@ -36,9 +36,9 @@ const queryType: GraphQLObjectType = new GraphQLObjectType({
     },
     nodes: {
       type: new GraphQLList(nodeType),
-      args: { "ID": { type: GraphQLID } },
+      args: { "websites": { type: new GraphQLList(GraphQLID)} },
       resolve: async (obj, args) => {
-        return getGraph(args.ID);
+        return getGraph(args.websites);
       },
     }
   }
@@ -52,7 +52,7 @@ function nodeToGrapQL(node: node, neighbours: node[], owners: any): graphQLNode 
   if (neighbours) {
     return {
       url: node.url,
-      crawlTime: node.crawlTime.toString(),
+      crawlTime: node.crawlTime?.toString() || "",
       owner: owners[node.ownerId.toString()],
       title: node.title,
       links: neighbours.map((neighbour: node) => { return nodeToGrapQL(neighbour, null, owners) })
@@ -60,7 +60,7 @@ function nodeToGrapQL(node: node, neighbours: node[], owners: any): graphQLNode 
   } else {
     return {
       url: node.url,
-      crawlTime: node.crawlTime.toString(),
+      crawlTime: node.crawlTime?.toString() || "",
       owner: owners[node.ownerId.toString()],
       title: node.title,
       links: null
@@ -75,10 +75,12 @@ async function getWebpages() {
   return webpageToGraphQL(pages);
 }
 
-async function getGraph(id: bigint) {
+async function getGraph(id: bigint[]) {
   let db = DatabaseManager.getManager();
   let nodes = await db.getCrawledSitesForGraph(id);
   let pages = webpageToGraphQL(await db.getWebsites());
+  console.log(nodes);
+  console.log(pages);
   let mapOfNodes = Object.fromEntries(nodes.map((node, index) => [node.id.toString(), node]));
   let mapOfPages = Object.fromEntries(pages.map((page, index) => [page.identifier.toString(), page]));
   let result: graphQLNode[] = [];

@@ -1,5 +1,10 @@
+import { end } from 'cheerio/lib/api/traversing';
+import { query } from 'express';
 import { Pool } from 'pg';
+import format from 'pg-format';
+import { nodeModuleNameResolver } from 'typescript';
 import { execution, nullexecution, startingExecution } from '../model/execution';
+import { node } from '../model/node';
 import { nullpage, webpage } from '../model/webpage';
 import { parseResultToExecution, parseResultToNode, parseResultToWebpage } from './databaseUtils';
 
@@ -47,7 +52,12 @@ export class DatabaseManager {
 		return pages;
 	}
 
-	public async getWebsite(id: bigint): Promise<webpage> {
+	public async getWebsite(id: bigint, endTime : boolean = false): Promise<webpage> {
+		let timeColumn = "starttime";
+		if (endTime) {
+			timeColumn = "endtime";
+		}
+
 		let resutl = (await this.runQuery(`SELECT * FROM webpage WHERE id = $1`, [id])).rows;
 		let webpage: webpage = Object.assign({}, nullpage);
 		if (resutl.length == 0) {
@@ -55,28 +65,46 @@ export class DatabaseManager {
 		} else {
 			let res = resutl[0];
 			res.tags = await this.getWebsitesTags(id);
-			let lastExecution = (await this.runQuery(`SELECT executionstatus, starttime FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)`, [webpage.id]));
+			console.log(res);
+			let lastExecution = await this.runQuery(`SELECT executionstatus, ${timeColumn} as time FROM execution WHERE webpage_id = $1 AND starttime= (SELECT MAX(e.starttime) from execution AS e WHERE e.webpage_id = $1)`, [res.id]);
 			if (lastExecution.rowCount >= 1) {
 				res.executionStatus = lastExecution.rows[0].executionstatus;
-				res.executionTime = lastExecution.rows[0].starttime;
+				res.executionTime = lastExecution.rows[0].time;
 			}
 			webpage = parseResultToWebpage(res);
 		}
 		return webpage;
 	}
 
+	public async getWebsitesWithLatestExecutionStop(): Promise<webpage[]> {
+		let result = (await this.runQuery('SELECT * FROM webpage', [])).rows;
+		let pages = [];
+		for (let row of result) {
+			row.tags = await this.getWebsitesTags(row.id);
+			let lastExecution = (await this.runQuery(`SELECT endtime FROM execution WHERE webpage_id = $1 AND endtime = (SELECT MAX(e.endtime) from execution AS e WHERE e.webpage_id = $1)`, [row.id]));
+			if (lastExecution.rowCount >= 1) {
+				row.executionTime = lastExecution.rows[0].endtime;
+			}
+			pages.push(parseResultToWebpage(row));
+		}
+		return pages;
+	}
+
 	//creating website and its new tags
-	public async createWebsite(site: webpage) {
+	public async createWebsite(site: webpage) : Promise<webpage> {
 		const params = [site.url, site.regEx, site.periodicity, site.label, site.active];
 		let result = await this.runQuery(`INSERT INTO webpage(url, regex, periodicity, label, active) VALUES($1, $2, $3, $4, $5) RETURNING id`, params);
-		let count = result.rowCount;
-		if (count >= 1) {
+		if (result.rows.length > 0) {
 			const id = result.rows[0].id;
+			console.log(`inserted record ${id}`);
 			for (const tag of site.tags) {
-				count += await this.createTag(id, tag);
+				await this.createTag(id, tag);
 			}
+			site.id = id;
+			return site;
+		} else {
+			return nullpage;
 		}
-		return count;
 	}
 
 	private async createTag(id: bigint, tag: string) {
@@ -132,9 +160,9 @@ export class DatabaseManager {
 		return result.map((e) => { return e.node_id_to; });
 	}
 
-	public async getCrawledSitesForGraph(recordID: bigint) {
+	public async getCrawledSitesForGraph(recordID: bigint[]) {
 		const params = [recordID];
-		let result = (await this.runQuery(`SELECT * FROM nodes WHERE webpage_id = $1`, params)).rows;
+		let result = (await this.runQuery(`SELECT * FROM nodes WHERE webpage_id = ANY($1::int[])`, params)).rows;
 		let nodes = result.map((e) => { return parseResultToNode(e) });
 		for (let node of nodes) {
 			let neighbours = await this.getNeighbours(node.id);
@@ -148,7 +176,6 @@ export class DatabaseManager {
 	public async logNewExecution(execution: startingExecution): Promise<bigint> {
 		const params = [execution.recId, execution.executionStatus, execution.startTime, execution.crawledSites];
 		let result = await this.runQuery(`INSERT INTO execution(webpage_id, executionstatus, starttime, crawledsites) VALUES($1, $2, $3, $4) RETURNING id`, params);
-		let count = result.rowCount;
 		if (result.rowCount >= 1) {
 			return result.rows[0].id;
 		} else {
@@ -160,6 +187,64 @@ export class DatabaseManager {
 	public async executionUpdate(exec: execution) {
 		const params = [exec.id, exec.executionStatus, exec.endTime, exec.crawledSites]
 		let result = await this.runQuery(`UPDATE execution SET executionstatus = $2, endtime = $3, crawledsites = $4  WHERE id = $1`, params);
+		return result.rowCount;
+	}
+
+	private prepareInsertLinksQuery(query: string, depth: number, maxDepth: number): string {
+		if (depth === maxDepth) {
+			return query;
+		}
+		return this.prepareInsertLinksQuery(`${query}, ($1, $${depth + 1})`, depth + 1, maxDepth);
+	}
+
+	private async insertNodeLinks(id: bigint, node: node, insertedItems: number, nodes: node[]): Promise<number> {
+		if (node.links) {
+			let values = node.links.map(id => { return [node.id, nodes[id].id] });
+			console.log(`values`, values);
+			if (values.length > 0) {
+				let result = await this.runQuery(format('INSERT INTO nodelinks(node_id_from, node_id_to) VALUES %L', values), []);
+				return insertedItems + result.rowCount;
+			} else {
+				return insertedItems;
+			}
+
+			/*let query = this.prepareInsertLinksQuery(`INSERT INTO nodelinks(node_id_from, node_id_to) VALUES($1, $2)`, 2, node.links.length + 1);
+			let queryParams = [node.id].concat(node.links.map(id => { return nodes[id].id }));
+			console.log(query, queryParams);
+			let result = await this.runQuery(query, queryParams);*/
+		} else {
+			return 0;
+		}
+	}
+
+	// links in node -> position of other node in array
+	//return number of inserted items into database (nodes + all links)
+	public async storeNodeGraph(record: webpage, nodes: node[]): Promise<number> {
+		const deleteParams = [record.id];
+		let result = await this.runQuery(`DELETE FROM nodes WHERE webpage_id = $1`, deleteParams);
+		let insertedItems = 0;
+		for (let node of nodes) {
+			let params = [node.url, node.crawlTime, node.title, record.id];
+			let result = await this.runQuery(`INSERT INTO nodes(url, crawl_time, title, webpage_id) VALUES($1, $2, $3, $4) RETURNING id`, params);
+			if (result.rowCount >= 1) {
+				node.id = result.rows[0].id;
+				insertedItems += 1;
+			} else {
+				throw new Error('one node couldnt be saved');
+			}
+		}
+
+		console.log(nodes);
+
+		for (let node of nodes) {
+			insertedItems = await this.insertNodeLinks(record.id, node, insertedItems, nodes);
+		}
+
+		return insertedItems;
+	}
+
+	public async removeUnfinishedExecutions() {
+		let result = await this.runQuery(`DELETE FROM execution WHERE endtime IS NULL`, []);
 		return result.rowCount;
 	}
 }
