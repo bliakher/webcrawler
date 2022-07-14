@@ -38,7 +38,7 @@ export class DatabaseManager {
 	}
 
 	public async getWebsites(): Promise<webpage[]> {
-		let result = (await this.runQuery('SELECT * FROM webpage', [])).rows;
+		let result = (await this.runQuery('SELECT * FROM webpage ORDER BY id', [])).rows;
 		let pages = [];
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
@@ -77,7 +77,7 @@ export class DatabaseManager {
 	}
 
 	public async getWebsitesWithLatestExecutionStop(): Promise<webpage[]> {
-		let result = (await this.runQuery('SELECT * FROM webpage WHERE active = true', [])).rows;
+		let result = (await this.runQuery('SELECT * FROM webpage WHERE active = true ORDER BY id', [])).rows;
 		let pages = [];
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
@@ -133,7 +133,7 @@ export class DatabaseManager {
 
 	//
 	public async getExecutions() {
-		let result = (await this.runQuery('SELECT * FROM execution', [])).rows;
+		let result = (await this.runQuery('SELECT * FROM execution ORDER BY endtime DESC', [])).rows;
 		let executions: execution[] = [];
 		for (let exec of result) {
 			executions.push(parseResultToExecution(exec));
@@ -162,7 +162,7 @@ export class DatabaseManager {
 
 	public async getCrawledSitesForGraph(recordID: bigint[]) {
 		const params = [recordID];
-		let result = (await this.runQuery(`SELECT * FROM nodes WHERE webpage_id = ANY($1::int[])`, params)).rows;
+		let result = (await this.runQuery(format(`SELECT * FROM nodes WHERE webpage_id IN (%L)`, recordID), [])).rows;
 		let nodes = result.map((e) => { return parseResultToNode(e) });
 		for (let node of nodes) {
 			let neighbours = await this.getNeighbours(node.id);
@@ -185,6 +185,7 @@ export class DatabaseManager {
 
 	//if rowCount <= 1 the execution doesn't exist
 	public async executionUpdate(exec: execution) {
+		console.log(`updating execution`, exec);
 		const params = [exec.id, exec.executionStatus, exec.endTime, exec.crawledSites]
 		let result = await this.runQuery(`UPDATE execution SET executionstatus = $2, endtime = $3, crawledsites = $4  WHERE id = $1`, params);
 		return result.rowCount;
