@@ -52,7 +52,7 @@ function nodeToGrapQL(node: node, neighbours: node[], owners: any): graphQLNode 
   if (neighbours) {
     return {
       url: node.url,
-      crawlTime: node.crawlTime?.toString() || "",
+      crawlTime: node.crawlTime? node.crawlTime : 0,
       owner: owners[node.ownerId.toString()],
       title: node.title,
       links: neighbours.map((neighbour: node) => { return nodeToGrapQL(neighbour, null, owners) })
@@ -60,7 +60,7 @@ function nodeToGrapQL(node: node, neighbours: node[], owners: any): graphQLNode 
   } else {
     return {
       url: node.url,
-      crawlTime: node.crawlTime?.toString() || "",
+      crawlTime: node.crawlTime? node.crawlTime : 0,
       owner: owners[node.ownerId.toString()],
       title: node.title,
       links: null

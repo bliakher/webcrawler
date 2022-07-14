@@ -12,7 +12,7 @@ export interface node {
 export interface graphQLNode {
     title : string,
     url : string,
-    crawlTime : string,
+    crawlTime : number,
     links? : graphQLNode[],
     owner : graphQLWebPage
 }
