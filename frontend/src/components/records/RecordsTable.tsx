@@ -1,16 +1,17 @@
 import React from "react";
 import { Button, Form, Table } from "react-bootstrap";
 import { ExecutionData } from "../../model/Execution";
-import { RecordData } from "../../model/Record";
+import { RecordData, RecordCallback } from "../../model/Record";
 import { ImBin as DeleteIcon } from 'react-icons/im';
 import { FiEdit as EditIcon } from 'react-icons/fi';
-
+import { VscDebugRestart as StartIcon } from 'react-icons/vsc';
 
 interface RecordTableProps {
     records: RecordData[];
-    editCallback: (recordId: number) => void;
-    deleteCallback: (recordId: number) => void;
-    checkCallback: (recordId: number) => void;
+    editCallback: RecordCallback;
+    deleteCallback: RecordCallback;
+    startCallback: RecordCallback;
+    checkCallback: RecordCallback;
 }
 
 export class RecordTable extends React.Component<RecordTableProps> {
@@ -36,6 +37,8 @@ export class RecordTable extends React.Component<RecordTableProps> {
                             <RecordRow key={record.id} record={record} 
                                 editCallback={() => this.props.editCallback(record.id)}
                                 deleteCallback={() => this.props.deleteCallback(record.id)}
+
+                                startCallback={() => this.props.startCallback(record.id)}
                                 checkCallback={() => this.props.checkCallback(record.id)} />)) }
                     </tbody>
             </Table>
@@ -47,6 +50,7 @@ interface RecordRowProps {
     record: RecordData;
     editCallback: () => void;
     deleteCallback: () => void;
+    startCallback: () => void;
     checkCallback: () => void;
 }
 
@@ -68,6 +72,9 @@ const RecordRow = (props: RecordRowProps) => {
                 </Button>
                 <Button onClick={props.deleteCallback} variant="danger" className="m-1">
                     <DeleteIcon />
+                </Button>
+                <Button onClick={props.startCallback} variant="success" className="m-1">
+                    <StartIcon />
                 </Button>
                 <Form.Check type="checkbox" onChange={props.checkCallback}/>
             </td>

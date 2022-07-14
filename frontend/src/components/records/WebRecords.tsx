@@ -243,7 +243,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                     </Row>
 
                     <RecordTable records={recordsSliced} editCallback={this.handleEdit} deleteCallback={this.handleDelete}
-                                checkCallback={this.handleRowCheck}/>
+                                startCallback={this.handleStartExecution} checkCallback={this.handleRowCheck}/>
                     <Row className="justify-content-md-center text-center">
                         <Col className="m-2">
                             <MyPagination currentPage={this.state.curPage} totalCount={records.length} pageSize={this.PAGE_SIZE}

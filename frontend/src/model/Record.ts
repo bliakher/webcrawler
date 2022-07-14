@@ -1,6 +1,9 @@
 import { IRecord } from '../api/rest/model'; 
 import { ExecutionStatus, ExecutionData } from './Execution';
 
+
+export type RecordCallback = (recordId: number) => void;
+
 export class RecordData {
 
     id: number;

@@ -1,7 +1,7 @@
 import React from 'react';
 import * as d3 from "d3";
 import { graph, ForceDirectedGraph } from '../graph/ForceDirectedGraph';
-import { RecordData } from '../model/Record';
+import { RecordCallback, RecordData } from '../model/Record';
 import { ServiceGraphql } from '../api/graphql/service';
 import { GraphTransfom } from '../graph/GraphTransform';
 import { Button, Card, Col, Form, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
@@ -12,7 +12,7 @@ import CardHeader from 'react-bootstrap/esm/CardHeader';
 interface VisualizationProps {
     checkedRecords: number[]; // list of record id - records to visualize
     records: RecordData[];
-    startExecutionCallback: (recordId: number) => void;
+    startExecutionCallback: RecordCallback;
 }
 
 interface VisualizationState {
