@@ -17,7 +17,7 @@ export async function crawl(record: webpage, execution: execution, fromPost : bo
 
 	const url = record.url
 	const regex = new RegExp(record.regEx)
-	const nodes: node[] = [<node>{ url }]
+	const nodes: node[] = [<node>{ 'url': url, 'crawlTime': 0 }]
 
 	const crawledMap = new Map<string, number>()
 	crawledMap.set(shortenUrl(url), 0)
