@@ -10,8 +10,18 @@ export class GraphTransfom {
 
     constructor(data: Node[], records: RecordData[]) {
         this.data = data;
-        this.filtered = this.filterDuplicateNodes(data);
         this.records = records;
+        this.filtered = this.filterDuplicateNodes(data);
+    }
+
+    private removeAllNodesByLinks(nodes: Map<string, Node>, links: ILink[], owners: number[]) {
+        for (var link of links) {
+            var node = nodes.get(link.url);
+            if (node && !node.hasOtherOwners(owners)) {
+                // if node is in map and doesn't have other owners than the duplicate ones we can remove it
+                nodes.delete(link.url);
+            }
+        }
     }
 
     private filterDuplicateNodes(data: Node[]): Node[] {
@@ -24,11 +34,16 @@ export class GraphTransfom {
                 if (!nodeRecord || !duplicateRecord) throw new Error("Incorrect owner id")
                 if (nodeRecord.lastExecTime <= duplicateRecord.lastExecTime) {
                     // node that is already in the map is newer so we leave its data
+                    this.removeAllNodesByLinks(uniqueNodes, node.links, node.owners);
                     duplicate.owners.push(node.owners[0]); // add owner to list
                     continue;
+                } else {
+                    this.removeAllNodesByLinks(uniqueNodes, duplicate.links, duplicate.owners); // remove all nodes that are linked fromduplicate because we are replacing it
+                    node.owners.push(...duplicate.owners);
                 }
             } 
             // if map doesn't have node, or the node is older we change data
+
             uniqueNodes.set(node.url, node);
         }
         return Array.from(uniqueNodes.values());
@@ -62,6 +77,8 @@ export class GraphTransfom {
         let nodes: D3Node[] = [];
         let links: D3Link[] = []
         inputNodes.forEach((value) => {
+            if (value.url == "https://www.vysokeskoly.cz/?utm_source=www.gymspit.cz&utm_medium=referral&utm_campaign=iframe&utm_content=logo")
+                console.log(value);
             let node: D3Node = {
                 id: value.url, // id is url
                 name: useTitle? 
@@ -74,6 +91,7 @@ export class GraphTransfom {
             nodes.push(node);
             value.links.forEach(link => {
                 let d3link: D3Link = {source: value.url, target: link.url};
+                if (link.url == "https://www.vysokeskoly.cz/katalog-vs/univerzita-karlova/1-lekarska-fakulta/153") console.log(d3link);
                 links.push(d3link);
             })
             
