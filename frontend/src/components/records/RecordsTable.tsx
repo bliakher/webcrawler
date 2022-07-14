@@ -5,6 +5,7 @@ import { RecordData, RecordCallback } from "../../model/Record";
 import { ImBin as DeleteIcon } from 'react-icons/im';
 import { FiEdit as EditIcon } from 'react-icons/fi';
 import { VscDebugRestart as StartIcon } from 'react-icons/vsc';
+import { FaRunning as RunningIcon} from 'react-icons/fa';
 
 interface RecordTableProps {
     records: RecordData[];
@@ -30,6 +31,7 @@ export class RecordTable extends React.Component<RecordTableProps> {
                             <th>Last execution time</th>
                             <th>Last execution status</th>
                             <th>Actions</th>
+                            <th>Select</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,13 +60,13 @@ const RecordRow = (props: RecordRowProps) => {
     const record = props.record;
     return (
         <tr key={record.id}>
-            <td>{record.label}</td>
+            <td>{record.label} {record.active ? <RunningIcon className="green-icon"/> : ""}</td>
             <td>{record.url }</td>
             <td>{record.periodicity.toString()}</td>
             <td>
                 {record.tags.map(tag => (<div key={tag}>{tag}</div>))}
             </td>
-            <td>{record.lastExecTime.toString()}</td>
+            <td>{record.lastExecTime.toISOString()}</td>
             <td>{ExecutionData.getStatusString(record.lastExecStatus)}</td>
             <td>
                 <Button onClick={props.editCallback} variant="warning" className="m-1">
@@ -76,6 +78,8 @@ const RecordRow = (props: RecordRowProps) => {
                 <Button onClick={props.startCallback} variant="success" className="m-1">
                     <StartIcon />
                 </Button>
+            </td>
+            <td>
                 <Form.Check type="checkbox" onChange={props.checkCallback}/>
             </td>
         </tr>
