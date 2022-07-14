@@ -10,7 +10,6 @@ import { RecordTable } from './RecordsTable';
 import { EditModal } from './EditModal';
 
 // TODO: trigger page reload on edit dialog save
-// TODO: if edit of new record is cancelled, delete record
 
 interface WebRecordsStatus {
     loaded: boolean;
@@ -88,7 +87,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleEditClose() {
         this.setState({showEdit: false, editedRecord: null, isNew: false});
-        // window.location.reload();
+        window.location.reload();
     }
 
     handleEditSave(updatedRecord: RecordEditable, recordId: number) {
@@ -99,9 +98,10 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             ServiceRest.updateRecord(recordId, updatedRecord);
         }
     }
-    handleDelete(recordId: number) {
+    async handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
-        ServiceRest.deleteRecord(recordId);
+        await ServiceRest.deleteRecord(recordId);
+        window.location.reload();
     }
     handleNew(url?: string) {
         var emptyRecord = RecordData.createEmptyRecord()
@@ -117,8 +117,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleVisualize() { this.setState({visualizationDisplayed: !this.state.visualizationDisplayed}); }
 
-    handleStartExecution(recordId: number) {
-        ServiceRest.createExecution(recordId);
+    async handleStartExecution(recordId: number) {
+        await ServiceRest.createExecution(recordId);
+        window.location.reload();
     }
     renderHeader() {
         return (
