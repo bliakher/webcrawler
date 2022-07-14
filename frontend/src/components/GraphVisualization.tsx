@@ -19,6 +19,7 @@ interface VisualizationProps {
 interface VisualizationState {
     showDomain: boolean
     nodeDetail: D3Node | null;
+    error: boolean
 }
 
 export class GraphVisualization extends React.Component<VisualizationProps, VisualizationState> {
@@ -31,7 +32,7 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         this.svgContainer = React.createRef();
         this.svgRendered = false;
         this.dataTransform = null;
-        this.state = { showDomain: false, nodeDetail: null }
+        this.state = { showDomain: false, nodeDetail: null, error: false }
         this.handleSwitch = this.handleSwitch.bind(this);
         this.handleShowDetail = this.handleShowDetail.bind(this);
     }
@@ -39,12 +40,11 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
     async componentDidMount() {
         console.log("mount");
         var data = await ServiceGraphql.getNodes(this.props.checkedRecords);
+        if (data === null) {
+            this.setState({error: true});
+            return;
+        }
         this.dataTransform = new GraphTransfom(data, this.props.records);
-        // if(!this.svgRendered) {
-        //     var websiteData = this.dataTransform.getWebsiteData();
-        //     ForceDirectedGraph(websiteData, d3.select(this.svgContainer.current));
-        //     this.svgRendered = true;
-        // }
         this.showWebsite();
     }
 
@@ -83,6 +83,9 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         this.setState({nodeDetail: node});
     }
     render() {
+        if (this.state.error) {
+            return (<p>Error</p>);
+        }
         return (
             <>
                 <ul>
