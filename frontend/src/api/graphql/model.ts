@@ -22,7 +22,7 @@ export interface ILink {
 export class Node {
     title: string | null;
     url: string;
-    links: { url: string }[];
+    links: ILink[];
     owners: number[]; 
     crawlTime: number;
     constructor(nodeObj?: INode) {
@@ -41,5 +41,14 @@ export class Node {
         copy.owners = this.owners;
         copy.crawlTime = this.crawlTime;
         return copy;
+    }
+
+    hasOtherOwners(owners: number[]) {
+        for (var owner of this.owners) {
+            if (!owners.includes(owner)) {
+                return true;
+            }    
+        }
+        return false;
     }
 }

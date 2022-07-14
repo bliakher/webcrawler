@@ -13,6 +13,7 @@ interface VisualizationProps {
     checkedRecords: number[]; // list of record id - records to visualize
     records: RecordData[];
     startExecutionCallback: RecordCallback;
+    createRecordCallback: (recordUrl: string) => void
 }
 
 interface VisualizationState {
@@ -74,7 +75,8 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         } else {
             this.showWebsite();
         }
-        this.setState({showDomain: newShowDomain});
+        // remove node detail when switching between views
+        this.setState({showDomain: newShowDomain, nodeDetail: null});
     }
 
     handleShowDetail(node: D3Node) {
@@ -93,7 +95,9 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
                 </div>
 
                 {this.state.nodeDetail !== null && (
-                    <NodeInfo node={this.state.nodeDetail} startExecutionCallback={this.props.startExecutionCallback}/>
+                    <NodeInfo node={this.state.nodeDetail} 
+                        startExecutionCallback={this.props.startExecutionCallback}
+                        createRecordCallback={this.props.createRecordCallback}/>
                 ) }
 
                 <Row className="justify-content-md-center">
@@ -113,13 +117,31 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
 interface NodeInfoProps {
     node: D3Node;
     startExecutionCallback: (recordId: number) => void;
+    createRecordCallback: (recordUrl: string) => void
 }
 
 const NodeInfo = (props: NodeInfoProps) => {
 
     if (!props.node.crawled) {
         return (
-            <Col></Col>
+            <Row>
+                <Col className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5 m-2">
+                    <Card>
+                        <CardHeader><div className="fw-bold">Node information</div></CardHeader>
+                        <ListGroup variant="flush">
+                            <ListGroupItem>
+                                <div className="fw-bold">Node:</div> {props.node.name}
+                            </ListGroupItem>
+                            <ListGroupItem>
+                                <div className="fw-bold">Crawled:</div> {props.node.crawled ? "YES" : "NO"}
+                            </ListGroupItem>
+                            <ListGroupItem>
+                                <Button onClick={() => props.createRecordCallback(props.node.id)} size="sm">Create new record from node</Button>
+                            </ListGroupItem>
+                        </ListGroup>
+                    </Card>
+                </Col>
+            </Row>
         );
     }
 
@@ -131,6 +153,9 @@ const NodeInfo = (props: NodeInfoProps) => {
                     <ListGroup variant="flush">
                         <ListGroupItem>
                             <div className="fw-bold">Node:</div> {props.node.name}
+                        </ListGroupItem>
+                        <ListGroupItem>
+                            <div className="fw-bold">Crawled:</div> {props.node.crawled ? "YES" : "NO"}
                         </ListGroupItem>
                         <ListGroupItem>
                             <div className="fw-bold">URL:</div> {props.node.id}

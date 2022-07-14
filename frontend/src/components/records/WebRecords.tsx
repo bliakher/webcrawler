@@ -103,8 +103,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         console.log("delete rec: ", recordId);
         ServiceRest.deleteRecord(recordId);
     }
-    async handleNew() {
+    handleNew(url?: string) {
         var emptyRecord = RecordData.createEmptyRecord()
+        if (url) emptyRecord.url = url;
         this.setState({showEdit: true, editedRecord: emptyRecord, isNew: true});
     }
     handlePageChange(pageNumber: number) { this.setState({curPage: pageNumber}); }
@@ -211,7 +212,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                     </Row>
                     
                     <GraphVisualization checkedRecords={Array.from(this.state.checkedRecords.values())} records={this.records} 
-                        startExecutionCallback={this.handleStartExecution}/>
+                        startExecutionCallback={this.handleStartExecution} createRecordCallback={this.handleNew}/>
                 </>
             );
         }
@@ -245,7 +246,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                         <Col className="col-12 col-sm-12 col-md-4 col-lg-3 col-xl-3 col-xxl-3 d-flex p-2">
                             <div className='m-2'>
                             <h5>Add new record: </h5>
-                            <Button className="m-2" onClick={this.handleNew}>
+                            <Button className="m-2" onClick={() => this.handleNew()}>
                                 New record
                             </Button>
                             </div>
