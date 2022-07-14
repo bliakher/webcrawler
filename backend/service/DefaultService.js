@@ -50,8 +50,13 @@ exports.createRecord = function (body) {
 				"message": "successfully created"
 			};
 			if (insertedSite.id > 0) {
-				let executor = Executor.getExecutor();
-				executor.startImmidiateExecution(insertedSite, false);
+				if (page.active) {
+					let executor = Executor.getExecutor();
+					executor.startImmidiateExecution(insertedSite, false);
+					console.log('creating new page record');
+				} else {
+					console.log(`new page is inactive`);
+				}
 				resolve(examples[Object.keys(examples)[0]]);
 			} else {
 				reject(418);

@@ -77,7 +77,7 @@ export class DatabaseManager {
 	}
 
 	public async getWebsitesWithLatestExecutionStop(): Promise<webpage[]> {
-		let result = (await this.runQuery('SELECT * FROM webpage', [])).rows;
+		let result = (await this.runQuery('SELECT * FROM webpage WHERE active = true', [])).rows;
 		let pages = [];
 		for (let row of result) {
 			row.tags = await this.getWebsitesTags(row.id);
