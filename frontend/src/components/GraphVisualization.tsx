@@ -4,7 +4,7 @@ import { graph, ForceDirectedGraph } from '../graph/ForceDirectedGraph';
 import { RecordData } from '../model/Record';
 import { ServiceGraphql } from '../api/graphql/service';
 import { GraphTransfom } from '../graph/GraphTransform';
-import { Card, Col, Form, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
+import { Button, Card, Col, Form, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
 import { D3Node } from '../graph/VisualizationData';
 import CardHeader from 'react-bootstrap/esm/CardHeader';
 
@@ -12,6 +12,7 @@ import CardHeader from 'react-bootstrap/esm/CardHeader';
 interface VisualizationProps {
     checkedRecords: number[]; // list of record id - records to visualize
     records: RecordData[];
+    startExecutionCallback: (recordId: number) => void;
 }
 
 interface VisualizationState {
@@ -88,9 +89,9 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
                 <Form className="m-2">
                     <Form.Check type="switch" label="Show domains only" onChange={this.handleSwitch}/>
                 </Form>
-                
+
                 {this.state.nodeDetail !== null && (
-                    <NodeInfo node={this.state.nodeDetail} />
+                    <NodeInfo node={this.state.nodeDetail} startExecutionCallback={this.props.startExecutionCallback}/>
                 ) }
 
                 <Row className="justify-content-md-center">
@@ -109,13 +110,20 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
 
 interface NodeInfoProps {
     node: D3Node;
+    startExecutionCallback: (recordId: number) => void;
 }
 
 const NodeInfo = (props: NodeInfoProps) => {
 
+    if (!props.node.crawled) {
+        return (
+            <Col></Col>
+        );
+    }
+
     return (
         <Row>
-            <Col className="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 m-2">
+            <Col className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5 m-2">
                 <Card>
                     <CardHeader><div className="fw-bold">Node information</div></CardHeader>
                     <ListGroup variant="flush">
@@ -125,16 +133,21 @@ const NodeInfo = (props: NodeInfoProps) => {
                         <ListGroupItem>
                             <div className="fw-bold">URL:</div> {props.node.id}
                         </ListGroupItem>
-                        {props.node.crawled && (
-                            <>
-                            <ListGroupItem>
-                                <div className="fw-bold">Crawl time:</div> {props.node.crawlTime}
-                            </ListGroupItem>
-                            <ListGroupItem>
-                                <div className="fw-bold">Web records:</div>
-                            </ListGroupItem>
-                            </>
-                        )}
+                        <ListGroupItem>
+                            <div className="fw-bold">Crawl time:</div> {props.node.crawlTime}
+                        </ListGroupItem>
+                    </ListGroup>
+                </Card>
+            </Col>
+            <Col className="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5 m-2">
+                <Card>
+                    <CardHeader><div className="fw-bold">Node crawled by records</div></CardHeader>
+                    <ListGroup variant="flush">
+                        { props.node.owners.map(owner => (
+                            <div className="m-2">
+                                {owner.label} <Button onClick={() => props.startExecutionCallback(owner.id)} size="sm">Start execution</Button>
+                            </div>
+                        )) }
                     </ListGroup>
                 </Card>
             </Col>

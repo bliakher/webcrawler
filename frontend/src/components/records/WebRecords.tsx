@@ -59,6 +59,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleRowCheck = this.handleRowCheck.bind(this);
         this.handleVisualize = this.handleVisualize.bind(this);
         this.handleNew = this.handleNew.bind(this);
+        this.handleStartExecution = this.handleStartExecution.bind(this);
     }
     async componentDidMount() {
         this.records = await ServiceRest.getRecords();
@@ -115,7 +116,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleVisualize() { this.setState({visualizationDisplayed: !this.state.visualizationDisplayed}); }
 
-
+    handleStartExecution(recordId: number) {
+        ServiceRest.createExecution(recordId);
+    }
     renderHeader() {
         return (
             <Row className="text-center">
@@ -201,7 +204,8 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             return (
                 <>
                     { button }
-                    <GraphVisualization checkedRecords={Array.from(this.state.checkedRecords.values())} records={this.records} />
+                    <GraphVisualization checkedRecords={Array.from(this.state.checkedRecords.values())} records={this.records} 
+                        startExecutionCallback={this.handleStartExecution}/>
                 </>
             );
         }
