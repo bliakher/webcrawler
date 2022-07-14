@@ -55,6 +55,7 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         if (this.dataTransform) {
             this.removeVisualization();
             var websiteData = this.dataTransform.getWebsiteData();
+            // console.log(websiteData);
             ForceDirectedGraph(websiteData, d3.select(this.svgContainer.current), this.handleShowDetail)
         }
     }
@@ -82,13 +83,14 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
     render() {
         return (
             <>
-                <h3>Visualize:</h3>
                 <ul>
                     { this.props.checkedRecords.map(record => (<li key={record}>{record}</li>)) }
                 </ul>
-                <Form className="m-2">
-                    <Form.Check type="switch" label="Show domains only" onChange={this.handleSwitch}/>
-                </Form>
+                <div className="justify-content-md-center">
+                    <Form className="m-2">
+                        <Form.Check type="switch" label="Show domains only" onChange={this.handleSwitch}/>
+                    </Form>
+                </div>
 
                 {this.state.nodeDetail !== null && (
                     <NodeInfo node={this.state.nodeDetail} startExecutionCallback={this.props.startExecutionCallback}/>
@@ -134,7 +136,7 @@ const NodeInfo = (props: NodeInfoProps) => {
                             <div className="fw-bold">URL:</div> {props.node.id}
                         </ListGroupItem>
                         <ListGroupItem>
-                            <div className="fw-bold">Crawl time:</div> {props.node.crawlTime}
+                            <div className="fw-bold">Crawl time:</div> {props.node.crawlTime / 1000} s
                         </ListGroupItem>
                     </ListGroup>
                 </Card>
@@ -144,7 +146,7 @@ const NodeInfo = (props: NodeInfoProps) => {
                     <CardHeader><div className="fw-bold">Node crawled by records</div></CardHeader>
                     <ListGroup variant="flush">
                         { props.node.owners.map(owner => (
-                            <div className="m-2">
+                            <div className="m-2" key={owner.id}>
                                 {owner.label} <Button onClick={() => props.startExecutionCallback(owner.id)} size="sm">Start execution</Button>
                             </div>
                         )) }

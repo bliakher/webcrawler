@@ -26,7 +26,7 @@ interface WebRecordsStatus {
     editedRecord: RecordData | null;
 }
 export class WebRecords extends React.Component<{}, WebRecordsStatus> {
-    PAGE_SIZE = 2;
+    PAGE_SIZE = 5;
     records: RecordData[] | null;
     constructor(props: any) {
         super(props);
@@ -203,14 +203,24 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         if (this.state.visualizationDisplayed && this.records) {
             return (
                 <>
-                    { button }
+                    <Row className="justify-content-md-center text-center">
+                        <span>
+                            { button }
+                            <h3>Visualization</h3>
+                        </span>
+                    </Row>
+                    
                     <GraphVisualization checkedRecords={Array.from(this.state.checkedRecords.values())} records={this.records} 
                         startExecutionCallback={this.handleStartExecution}/>
                 </>
             );
         }
         return (
-            button
+            <Row className="justify-content-md-center text-center">
+                <span>
+                    { button }
+                </span>
+            </Row>
         );
     }
 
