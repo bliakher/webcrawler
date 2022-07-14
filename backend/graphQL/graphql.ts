@@ -36,7 +36,7 @@ const queryType: GraphQLObjectType = new GraphQLObjectType({
     },
     nodes: {
       type: new GraphQLList(nodeType),
-      args: { "websites": { type: new GraphQLList(GraphQLID)} },
+      args: { "webPages": { type: new GraphQLList(GraphQLID)} },
       resolve: async (obj, args) => {
         return getGraph(args.websites);
       },
