@@ -9,6 +9,7 @@ import { FaRunning as RunningIcon} from 'react-icons/fa';
 
 interface RecordTableProps {
     records: RecordData[];
+    checkedRecords: Set<number>;
     editCallback: RecordCallback;
     deleteCallback: RecordCallback;
     startCallback: RecordCallback;
@@ -37,6 +38,7 @@ export class RecordTable extends React.Component<RecordTableProps> {
                     <tbody>
                         { this.props.records.map(record => (
                             <RecordRow key={record.id} record={record} 
+                                isChecked={this.props.checkedRecords.has(record.id)}
                                 editCallback={() => this.props.editCallback(record.id)}
                                 deleteCallback={() => this.props.deleteCallback(record.id)}
 
@@ -50,6 +52,7 @@ export class RecordTable extends React.Component<RecordTableProps> {
 
 interface RecordRowProps {
     record: RecordData;
+    isChecked: boolean;
     editCallback: () => void;
     deleteCallback: () => void;
     startCallback: () => void;
@@ -80,7 +83,7 @@ const RecordRow = (props: RecordRowProps) => {
                 </Button>
             </td>
             <td>
-                <Form.Check type="checkbox" onChange={props.checkCallback}/>
+                <Form.Check type="checkbox" onChange={props.checkCallback} defaultChecked={props.isChecked}/>
             </td>
         </tr>
     );
