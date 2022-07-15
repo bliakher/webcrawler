@@ -2,6 +2,7 @@
 
 const { Executor } = require('../crawling/executor');
 const { DatabaseManager } = require('../dbservice/databaseManager.ts');
+const { validateRecord } = require('../model/validators');
 
 /**
  * Create new execution without values
@@ -39,18 +40,27 @@ exports.createRecord = function (body) {
 	return new Promise(async function (resolve, reject) {
 		var examples = {};
 		let page = Object.assign({}, body);
-		let db = DatabaseManager.getManager();
-		let insertedSite = await db.createWebsite(page);
-		examples['application/json'] = {
-			"success": true,
-			"message": "successfully created"
-		};
-		if (insertedSite.id > 0) {
-			let executor = Executor.getExecutor();
-			executor.startImmidiateExecution(insertedSite, false);
-			resolve(examples[Object.keys(examples)[0]]);
+		if (!validateRecord(page)) {
+			reject(400);
 		} else {
-			reject(418);
+			let db = DatabaseManager.getManager();
+			let insertedSite = await db.createWebsite(page);
+			examples['application/json'] = {
+				"success": true,
+				"message": "successfully created"
+			};
+			if (insertedSite.id > 0) {
+				if (page.active) {
+					let executor = Executor.getExecutor();
+					executor.startImmidiateExecution(insertedSite, false);
+					console.log('creating new page record');
+				} else {
+					console.log(`new page is inactive`);
+				}
+				resolve(examples[Object.keys(examples)[0]]);
+			} else {
+				reject(418);
+			}
 		}
 	});
 }
@@ -188,21 +198,25 @@ exports.updateRecord = function (body, recID) {
 	return new Promise(async function (resolve, reject) {
 		var examples = {};
 		let dbManager = DatabaseManager.getManager();
-		let rows = await dbManager.updateWebsite(recID, body);
-		examples['application/json'] = {
-			"success": true,
-			"message": "messageUpdate"
-		};
-		if (rows == 1) {
-			let executor = Executor.getExecutor();
-			executor.updateRecord(recID);
-			resolve(examples[Object.keys(examples)[0]]);
-		} else if (rows == 0) {
-			reject(404);
-		} else if (rows < 0) {
-			reject(500);
+		if (!validateRecord(body)) {
+			reject(400);
 		} else {
-			reject(418);
+			let rows = await dbManager.updateWebsite(recID, body);
+			examples['application/json'] = {
+				"success": true,
+				"message": "messageUpdate"
+			};
+			if (rows == 1) {
+				let executor = Executor.getExecutor();
+				executor.updateRecord(recID);
+				resolve(examples[Object.keys(examples)[0]]);
+			} else if (rows == 0) {
+				reject(404);
+			} else if (rows < 0) {
+				reject(500);
+			} else {
+				reject(418);
+			}
 		}
 	});
 }

@@ -34,7 +34,7 @@ export class Executor {
 	}
 
 	public async stopExecutions(id: bigint) {
-		let job : Job = scheduledJobs[`RECORD${id}`];
+		let job: Job = scheduledJobs[`RECORD${id}`];
 		if (job) {
 			job.cancel();
 		}
@@ -47,8 +47,17 @@ export class Executor {
 			job.cancel();
 		}
 
-		let rec = await this.db.getWebsite(id, true);
-		this.planExecution(rec, new Date(new Date(rec.lastExecTime).getTime() + (rec.periodicity * 60 * 1000)));
+		let rec: webpage = await this.db.getWebsite(id, true);
+		if (rec.active) {
+			console.log(`rec ${rec.id} is active`);
+			if (rec.lastExecTime) {
+				this.planExecution(rec, new Date(new Date(rec.lastExecTime).getTime() + (rec.periodicity * 60 * 1000)));
+			} else {
+				this.startImmidiateExecution(rec, false);
+			}
+		} else {
+			console.log(`rec ${rec.id} is inactive`);
+		}
 	}
 
 	private async loadAndPlanAllExecutionsOnStart() {

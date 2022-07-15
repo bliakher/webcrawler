@@ -26,9 +26,11 @@ module.exports.createRecord = function createRecord(req, res, next, body) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      if (response == 418) {
+      if (response === 418) {
         utils.writeJson(res, Errors.iamTeaPotUCoffeeBrewer);
-      } else {
+      } else if (response === 400) {
+		utils.writeJson(res, Errors.invalidBodyResponse);
+	  } else {
         utils.writeJson(res, Errors.generalErrorResponse);
       }
     });
@@ -40,7 +42,7 @@ module.exports.deleteRecord = function deleteRecord(req, res, next, recID) {
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      if (response == 404) {
+      if (response === 404) {
         utils.writeJson(res, Errors.notFoundResponse);
       } else {
         utils.writeJson(res, Errors.generalErrorResponse);
@@ -102,9 +104,11 @@ module.exports.updateRecord = function updateRecord(req, res, next, body, recID)
       utils.writeJson(res, response);
     })
     .catch(function (response) {
-      if (response == 404) {
+      if (response === 404) {
         utils.writeJson(res, Errors.notFoundResponse);
-      } else if (response == 418) {
+      } else if (response === 400) {
+		utils.writeJson(res, Errors.invalidBodyResponse);
+	  } else if (response === 418) {
         utils.writeJson(res, Errors.iamTeaPotUCoffeeBrewer);
       } else {
         utils.writeJson(res, Errors.generalErrorResponse);
