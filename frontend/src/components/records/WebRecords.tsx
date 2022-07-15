@@ -90,13 +90,14 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         window.location.reload();
     }
 
-    handleEditSave(updatedRecord: RecordEditable, recordId: number) {
+    async handleEditSave(updatedRecord: RecordEditable, recordId: number) {
         // TODO: show update/create result
         if (this.state.isNew) {
-            ServiceRest.createRecord(updatedRecord);
+            await ServiceRest.createRecord(updatedRecord);
         } else {
-            ServiceRest.updateRecord(recordId, updatedRecord);
+            await ServiceRest.updateRecord(recordId, updatedRecord);
         }
+        this.handleEditClose();
     }
     async handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);

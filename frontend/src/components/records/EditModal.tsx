@@ -65,7 +65,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
     handleSave() {
         // Service.updateRecord(this.props.initialRecord.id, this.state.record);
         this.props.onSaveCallback(this.state.record, this.props.initialRecord.id);
-        this.props.onCloseCallback();
+        // this.props.onCloseCallback();
     }
 
     render() {
