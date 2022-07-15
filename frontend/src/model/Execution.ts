@@ -1,4 +1,3 @@
-import { updateExternalModuleReference } from "typescript";
 import { IExecution } from "../api/rest/model";
 
 export enum ExecutionStatus {
@@ -18,8 +17,8 @@ export class ExecutionData {
     crawledSites: number;
 
     constructor(execObj: IExecution) {
-        this.id = execObj.id;
-        this.recordId = execObj.recId;
+        this.id = parseInt(execObj.id);
+        this.recordId = parseInt(execObj.recId);
         this.status = ExecutionData.getStatus(execObj.executionStatus);
         this.startTime = execObj.startTime ? new Date(execObj.startTime) : null;
         this.endTime = execObj.endTime ? new Date(execObj.endTime) : null;

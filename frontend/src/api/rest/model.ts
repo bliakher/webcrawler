@@ -22,8 +22,8 @@ export interface IRecordUpdate {
 }
 
 export interface IExecution {
-    id: number;
-    recId: number;
+    id: string;
+    recId: string;
     executionStatus: number;
     startTime: string;
     endTime: string;
