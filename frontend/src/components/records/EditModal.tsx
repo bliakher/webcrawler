@@ -105,7 +105,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
                             <PeriodicitySelector value={this.state.record.periodicity} onChangeCallback={this.handlePeriodicityChange} />
                         </Col>
                         <Col className="col-1 col-sm-1 col-md-1 col-lg-1 col-xl-1 col-xxl-1 p-2">
-                            <Form.Label for="active-check" className="m-1">Active</Form.Label>
+                            <Form.Label htmlFor="active-check" className="m-1">Active</Form.Label>
                             <Form.Check type="checkbox" onChange={this.handleActiveCheck} id="active-check" className="m-1"
                                 defaultChecked={this.state.record.active} />
                         </Col>

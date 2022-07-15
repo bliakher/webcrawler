@@ -8,7 +8,7 @@ export class ServiceGraphql {
     static async getNodes(recordIds: number[]): Promise<Node[] | null> {
         // return [];
         var query = `{
-            nodes(websites: [`;
+            nodes(webPages: [`;
         for (var id of recordIds) {
             query += '"' + id + '", ';
         };
