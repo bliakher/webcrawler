@@ -5,7 +5,8 @@ export enum ExecutionStatus {
     Waiting,
     Started,
     Ended,
-    Error
+    Error, 
+    Unknown
 }
 
 export class ExecutionData {
@@ -26,6 +27,7 @@ export class ExecutionData {
     }
 
     static getStatus(statusCode: number): ExecutionStatus {
+        if (!statusCode) return ExecutionStatus.Unknown;
         switch(statusCode) {
             case 0:
                 return ExecutionStatus.Waiting;
@@ -48,6 +50,8 @@ export class ExecutionData {
                 return 'ENDED';
             case ExecutionStatus.Error:
                 return 'ERROR';
+            case ExecutionStatus.Unknown:
+                return 'UNKNOWN';
         }
     }
 }

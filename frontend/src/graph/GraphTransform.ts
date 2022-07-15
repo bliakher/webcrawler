@@ -32,7 +32,7 @@ export class GraphTransfom {
                 let nodeRecord = this.findRecord(node.owners[0]);
                 let duplicateRecord = this.findRecord(duplicate.owners[0]);
                 if (!nodeRecord || !duplicateRecord) throw new Error("Incorrect owner id")
-                if (nodeRecord.lastExecTime <= duplicateRecord.lastExecTime) {
+                if (!nodeRecord.lastExecTime || !duplicateRecord.lastExecTime || (nodeRecord.lastExecTime <= duplicateRecord.lastExecTime)) {
                     // node that is already in the map is newer so we leave its data
                     this.removeAllNodesByLinks(uniqueNodes, node.links, node.owners);
                     duplicate.owners.push(node.owners[0]); // add owner to list

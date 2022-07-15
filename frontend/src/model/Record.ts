@@ -13,7 +13,7 @@ export class RecordData {
     label: string;
     active: boolean;
     tags: string[];
-    lastExecTime: Date;
+    lastExecTime: Date | null;
     lastExecStatus: ExecutionStatus;
     constructor(recordObj: IRecord) {
         this.id = parseInt(recordObj.id);
@@ -23,7 +23,7 @@ export class RecordData {
         this.label = recordObj.label;
         this.active = recordObj.active;
         this.tags = recordObj.tags;
-        this.lastExecTime = new Date(recordObj.lastExecTime);
+        this.lastExecTime = recordObj.lastExecTime ? new Date(recordObj.lastExecTime) : null;
         this.lastExecStatus = ExecutionData.getStatus(recordObj.lastExecStatus);
     }
 
@@ -32,6 +32,8 @@ export class RecordData {
     }
 
     static compareByExecTime(rec1: RecordData, rec2: RecordData) {
+        if (rec1.lastExecTime === null) return -1;
+        if (rec2.lastExecTime === null) return 1;
         if (rec1.lastExecTime === rec2.lastExecTime) return 0;
         if (rec1.lastExecTime > rec2.lastExecTime) return 1;
         return -1;

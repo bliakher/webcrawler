@@ -66,7 +66,7 @@ const RecordRow = (props: RecordRowProps) => {
             <td>
                 {record.tags.map(tag => (<div key={tag}>{tag}</div>))}
             </td>
-            <td>{record.lastExecTime.toISOString()}</td>
+            <td>{record.lastExecTime?.toISOString() ?? "-"}</td>
             <td>{ExecutionData.getStatusString(record.lastExecStatus)}</td>
             <td>
                 <Button onClick={props.editCallback} variant="warning" className="m-1">
