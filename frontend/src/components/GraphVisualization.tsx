@@ -13,14 +13,15 @@ interface VisualizationProps {
     checkedRecords: number[]; // list of record id - records to visualize
     records: RecordData[];
     startExecutionCallback: RecordCallback;
-    createRecordCallback: (recordUrl: string) => void
+    createRecordCallback: (recordUrl: string) => void;
+    isDomainView: boolean;
+    isLive: boolean;
+    setVisualizeState: (isLive: boolean, isDomainView: boolean) => void;
 }
 
 interface VisualizationState {
-    showDomain: boolean
     nodeDetail: D3Node | null;
     error: boolean;
-    isLive: boolean;
     timerId: ReturnType<typeof setTimeout> | null;
 }
 
@@ -35,11 +36,12 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         this.svgContainer = React.createRef();
         this.svgRendered = false;
         this.dataTransform = null;
-        this.state = { showDomain: false, nodeDetail: null, error: false, isLive: false, timerId: null };
+        this.state = { nodeDetail: null, error: false, timerId: null };
         this.handleLiveSwitch = this.handleLiveSwitch.bind(this);
         this.handleDomainSwitch = this.handleDomainSwitch.bind(this);
         this.handleShowDetail = this.handleShowDetail.bind(this);
         this.handleTimerUpdate = this.handleTimerUpdate.bind(this);
+        this.handleCreateRecord= this.handleCreateRecord.bind(this);
     }
 
     async componentDidMount() {
@@ -55,7 +57,7 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
 
     async update() {
         await this.getData();
-        this.showVizualization(this.state.showDomain);
+        this.showVizualization(this.props.isDomainView);
     }
 
     async getData() {
@@ -66,7 +68,6 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         }
         this.dataTransform = new GraphTransfom(data, this.props.records);
     }
-
 
     removeVisualization() {
         document.getElementById("visualization")?.replaceChildren();
@@ -101,24 +102,30 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
     }
 
     handleLiveSwitch() {
-        var newIsLive = !this.state.isLive;
+        var newIsLive = !this.props.isLive;
         if (newIsLive) {
             setTimeout(this.handleTimerUpdate, this.TIMER_PERIOD);
         } else {
             if (this.state.timerId) clearTimeout(this.state.timerId);
         }
-        this.setState({isLive: newIsLive});
+        this.props.setVisualizeState(newIsLive, this.props.isDomainView);
     }
 
     handleDomainSwitch() {
-        var newShowDomain = !this.state.showDomain;
+        var newShowDomain = !this.props.isDomainView;
         this.showVizualization(newShowDomain);
         // remove node detail when switching between views
-        this.setState({showDomain: newShowDomain, nodeDetail: null});
+        this.setState({nodeDetail: null});
+        this.props.setVisualizeState(this.props.isLive, newShowDomain);
     }
 
     handleShowDetail(node: D3Node) {
         this.setState({nodeDetail: node});
+    }
+
+    handleCreateRecord(recordUrl: string) {
+        this.props.createRecordCallback(recordUrl);
+        this.props.setVisualizeState(true, this.props.isDomainView);
     }
     render() {
         if (this.state.error) {
@@ -131,17 +138,17 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
                 </ul>
                 <div className="justify-content-md-center">
                     <Form className="m-2">
-                        <Form.Check type="switch" label="Turn on live mode" onChange={this.handleLiveSwitch}/>
+                        <Form.Check type="switch" label="Turn on live mode" defaultChecked={this.props.isLive} onChange={this.handleLiveSwitch}/>
                     </Form>
                     <Form className="m-2">
-                        <Form.Check type="switch" label="Show domains only" onChange={this.handleDomainSwitch}/>
+                        <Form.Check type="switch" label="Show domains only" defaultChecked={this.props.isDomainView} onChange={this.handleDomainSwitch}/>
                     </Form>
                 </div>
 
                 {this.state.nodeDetail !== null && (
                     <NodeInfo node={this.state.nodeDetail} 
                         startExecutionCallback={this.props.startExecutionCallback}
-                        createRecordCallback={this.props.createRecordCallback}/>
+                        createRecordCallback={this.handleCreateRecord}/>
                 ) }
 
                 <Row className="justify-content-md-center">

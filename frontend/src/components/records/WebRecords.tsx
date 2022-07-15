@@ -11,7 +11,7 @@ import { EditModal } from './EditModal';
 
 // TODO: trigger page reload on edit dialog save
 
-interface WebRecordsStatus {
+interface WebRecordsState {
     loaded: boolean;
     error: boolean;
     filterOn: boolean;
@@ -19,12 +19,15 @@ interface WebRecordsStatus {
     sortBy: { url: boolean, time: boolean };
     curPage: number;
     checkedRecords: Set<number>;
-    visualizationDisplayed: boolean;
     showEdit: boolean;
     isNew: boolean;
     editedRecord: RecordData | null;
+    visualizationDisplayed: boolean;
+    visualizationIsLive: boolean;
+    visualizationIsDomainView: boolean;
+
 }
-export class WebRecords extends React.Component<{}, WebRecordsStatus> {
+export class WebRecords extends React.Component<{}, WebRecordsState> {
     PAGE_SIZE = 5;
     records: RecordData[] | null;
     constructor(props: any) {
@@ -39,6 +42,8 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
             curPage: 1,
             checkedRecords: new Set(),
             visualizationDisplayed: false,
+            visualizationIsLive: false,
+            visualizationIsDomainView: false,
             showEdit: false,
             isNew: false,
             editedRecord: null
@@ -59,6 +64,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleVisualize = this.handleVisualize.bind(this);
         this.handleNew = this.handleNew.bind(this);
         this.handleStartExecution = this.handleStartExecution.bind(this);
+        this.setVisualizeState = this.setVisualizeState.bind(this);
     }
     async componentDidMount() {
         await this.getData();
@@ -110,7 +116,10 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
     handleNew(url?: string) {
         var emptyRecord = RecordData.createEmptyRecord()
-        if (url) emptyRecord.url = url;
+        if (url) {
+            emptyRecord.url = url;
+            emptyRecord.active = true;
+        }
         this.setState({showEdit: true, editedRecord: emptyRecord, isNew: true});
     }
     handlePageChange(pageNumber: number) { this.setState({curPage: pageNumber}); }
@@ -121,6 +130,10 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.setState({checkedRecords: checked});
     }
     handleVisualize() { this.setState({visualizationDisplayed: !this.state.visualizationDisplayed}); }
+    setVisualizeState(isLive: boolean, isDomainView: boolean) {
+        console.log("set visualize");
+        this.setState({visualizationIsLive: isLive, visualizationIsDomainView: isDomainView})
+    }
 
     async handleStartExecution(recordId: number) {
         await ServiceRest.createExecution(recordId);
@@ -201,6 +214,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     }
 
     renderVisualization() {
+        console.log(this.state.visualizationIsLive);
         if (this.state.checkedRecords.size === 0) return null;
         var button = (
             <Button onClick={this.handleVisualize} className="m-3">
@@ -218,7 +232,10 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                     </Row>
                     
                     <GraphVisualization checkedRecords={Array.from(this.state.checkedRecords.values())} records={this.records} 
-                        startExecutionCallback={this.handleStartExecution} createRecordCallback={this.handleNew}/>
+                        startExecutionCallback={ this.handleStartExecution } 
+                        createRecordCallback={this.handleNew}
+                        isLive={this.state.visualizationIsLive} isDomainView={this.state.visualizationIsDomainView}
+                        setVisualizeState={this.setVisualizeState}/>
                 </>
             );
         }
@@ -259,7 +276,8 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
                         </Col>
                     </Row>
 
-                    <RecordTable records={recordsSliced} editCallback={this.handleEdit} deleteCallback={this.handleDelete}
+                    <RecordTable records={recordsSliced} checkedRecords={this.state.checkedRecords}
+                                editCallback={this.handleEdit} deleteCallback={this.handleDelete}
                                 startCallback={this.handleStartExecution} checkCallback={this.handleRowCheck}/>
                     <Row className="justify-content-md-center text-center">
                         <Col className="m-2">
