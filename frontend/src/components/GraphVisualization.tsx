@@ -19,22 +19,27 @@ interface VisualizationProps {
 interface VisualizationState {
     showDomain: boolean
     nodeDetail: D3Node | null;
-    error: boolean
+    error: boolean;
+    isLive: boolean;
+    timerId: ReturnType<typeof setTimeout> | null;
 }
 
 export class GraphVisualization extends React.Component<VisualizationProps, VisualizationState> {
+
+    TIMER_PERIOD = 10000;
     svgContainer: any;
     svgRendered: boolean;
-
     dataTransform: GraphTransfom | null;
     constructor(props: VisualizationProps) {
         super(props);
         this.svgContainer = React.createRef();
         this.svgRendered = false;
         this.dataTransform = null;
-        this.state = { showDomain: false, nodeDetail: null, error: false }
-        this.handleSwitch = this.handleSwitch.bind(this);
+        this.state = { showDomain: false, nodeDetail: null, error: false, isLive: false, timerId: null };
+        this.handleLiveSwitch = this.handleLiveSwitch.bind(this);
+        this.handleDomainSwitch = this.handleDomainSwitch.bind(this);
         this.handleShowDetail = this.handleShowDetail.bind(this);
+        this.handleTimerUpdate = this.handleTimerUpdate.bind(this);
     }
 
     async componentDidMount() {
@@ -45,12 +50,12 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
 
     async componentDidUpdate(prevProps: any){
         // if (prevProps.checkedRecords !== this.props.checkedRecords)
+        await this.update();
+    }
+
+    async update() {
         await this.getData();
-        if (this.state.showDomain) {
-            this.showDomain();
-        } else {
-            this.showWebsite();
-        }
+        this.showVizualization(this.state.showDomain);
     }
 
     async getData() {
@@ -67,6 +72,13 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         document.getElementById("visualization")?.replaceChildren();
     }
 
+    showVizualization(stateIsDomain: boolean) {
+        if (stateIsDomain) {
+            this.showDomain();
+        } else {
+            this.showWebsite();
+        }
+    }
     showWebsite() {
         if (this.dataTransform) {
             this.removeVisualization();
@@ -82,14 +94,25 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
             ForceDirectedGraph(domainData, d3.select(this.svgContainer.current), this.handleShowDetail)
         }
     }
+    async handleTimerUpdate() {
+        await this.update();
+        var timerId = setTimeout(this.handleTimerUpdate, this.TIMER_PERIOD);
+        this.setState({timerId: timerId});
+    }
 
-    handleSwitch() {
-        var newShowDomain = !this.state.showDomain;
-        if (newShowDomain) {
-            this.showDomain();
+    handleLiveSwitch() {
+        var newIsLive = !this.state.isLive;
+        if (newIsLive) {
+            setTimeout(this.handleTimerUpdate, this.TIMER_PERIOD);
         } else {
-            this.showWebsite();
+            if (this.state.timerId) clearTimeout(this.state.timerId);
         }
+        this.setState({isLive: newIsLive});
+    }
+
+    handleDomainSwitch() {
+        var newShowDomain = !this.state.showDomain;
+        this.showVizualization(newShowDomain);
         // remove node detail when switching between views
         this.setState({showDomain: newShowDomain, nodeDetail: null});
     }
@@ -108,7 +131,10 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
                 </ul>
                 <div className="justify-content-md-center">
                     <Form className="m-2">
-                        <Form.Check type="switch" label="Show domains only" onChange={this.handleSwitch}/>
+                        <Form.Check type="switch" label="Turn on live mode" onChange={this.handleLiveSwitch}/>
+                    </Form>
+                    <Form className="m-2">
+                        <Form.Check type="switch" label="Show domains only" onChange={this.handleDomainSwitch}/>
                     </Form>
                 </div>
 
