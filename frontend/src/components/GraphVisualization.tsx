@@ -39,14 +39,29 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
 
     async componentDidMount() {
         console.log("mount");
+        await this.getData();
+        this.showWebsite();
+    }
+
+    async componentDidUpdate(prevProps: any){
+        // if (prevProps.checkedRecords !== this.props.checkedRecords)
+        await this.getData();
+        if (this.state.showDomain) {
+            this.showDomain();
+        } else {
+            this.showWebsite();
+        }
+    }
+
+    async getData() {
         var data = await ServiceGraphql.getNodes(this.props.checkedRecords);
         if (data === null) {
             this.setState({error: true});
             return;
         }
         this.dataTransform = new GraphTransfom(data, this.props.records);
-        this.showWebsite();
     }
+
 
     removeVisualization() {
         document.getElementById("visualization")?.replaceChildren();

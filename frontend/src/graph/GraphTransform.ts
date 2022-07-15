@@ -77,8 +77,6 @@ export class GraphTransfom {
         let nodes: D3Node[] = [];
         let links: D3Link[] = []
         inputNodes.forEach((value) => {
-            if (value.url == "https://www.vysokeskoly.cz/?utm_source=www.gymspit.cz&utm_medium=referral&utm_campaign=iframe&utm_content=logo")
-                console.log(value);
             let node: D3Node = {
                 id: value.url, // id is url
                 name: useTitle? 
