@@ -46,7 +46,7 @@ export const MyPagination = (props: {
          
         // If the pageItem is a DOT, render the DOTS unicode character
         if (pageNumber === DOTS) {
-          return <Pagination.Ellipsis key={pageNumber} />;
+          return <Pagination.Ellipsis key={pageNumber + Math.random().toString()} />;
         }
 		
         // Render our Page Pills
