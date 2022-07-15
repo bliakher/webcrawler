@@ -61,6 +61,10 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         this.handleStartExecution = this.handleStartExecution.bind(this);
     }
     async componentDidMount() {
+        await this.getData();
+    }
+
+    async getData() {
         this.records = await ServiceRest.getRecords();
         var error = this.records === null;
         this.setState({loaded: true, error: error});
@@ -85,9 +89,9 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
         if (!record) return;
         this.setState({showEdit: true, editedRecord: record});
     }
-    handleEditClose() {
+    async handleEditClose() {
         this.setState({showEdit: false, editedRecord: null, isNew: false});
-        window.location.reload();
+        await this.getData();
     }
 
     async handleEditSave(updatedRecord: RecordEditable, recordId: number) {
@@ -102,7 +106,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
     async handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
         await ServiceRest.deleteRecord(recordId);
-        window.location.reload();
+        await this.getData();
     }
     handleNew(url?: string) {
         var emptyRecord = RecordData.createEmptyRecord()
@@ -120,7 +124,7 @@ export class WebRecords extends React.Component<{}, WebRecordsStatus> {
 
     async handleStartExecution(recordId: number) {
         await ServiceRest.createExecution(recordId);
-        window.location.reload();
+        await this.getData();
     }
     renderHeader() {
         return (
