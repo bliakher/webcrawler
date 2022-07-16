@@ -7,6 +7,7 @@ import { GraphTransfom } from '../graph/GraphTransform';
 import { Button, Card, Col, Form, ListGroup, ListGroupItem, Row } from 'react-bootstrap';
 import { D3Node } from '../graph/VisualizationData';
 import CardHeader from 'react-bootstrap/esm/CardHeader';
+import { areEqual } from '../utils/arrayCompare';
 
 
 interface VisualizationProps {
@@ -22,7 +23,6 @@ interface VisualizationProps {
 interface VisualizationState {
     nodeDetail: D3Node | null;
     error: boolean;
-    timerId: ReturnType<typeof setTimeout> | null;
 }
 
 export class GraphVisualization extends React.Component<VisualizationProps, VisualizationState> {
@@ -31,12 +31,14 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
     svgContainer: any;
     svgRendered: boolean;
     dataTransform: GraphTransfom | null;
+    timerId: ReturnType<typeof setTimeout> | null;
     constructor(props: VisualizationProps) {
         super(props);
         this.svgContainer = React.createRef();
         this.svgRendered = false;
         this.dataTransform = null;
-        this.state = { nodeDetail: null, error: false, timerId: null };
+        this.timerId = null;
+        this.state = { nodeDetail: null, error: false };
         this.handleLiveSwitch = this.handleLiveSwitch.bind(this);
         this.handleDomainSwitch = this.handleDomainSwitch.bind(this);
         this.handleShowDetail = this.handleShowDetail.bind(this);
@@ -48,11 +50,22 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         console.log("mount");
         await this.getData();
         this.showWebsite();
+        if (this.props.isLive && !this.timerId) {
+            this.setTimer();
+        }
+    }
+    componentWillUnmount() {
+        this.clearTimer();
     }
 
     async componentDidUpdate(prevProps: any){
-        // if (prevProps.checkedRecords !== this.props.checkedRecords)
-        await this.update();
+        if (!areEqual(prevProps.checkedRecords, this.props.checkedRecords)) {
+            await this.update();
+        }
+            
+        if (this.props.isLive && !this.timerId) {
+            this.setTimer();
+        }
     }
 
     async update() {
@@ -97,16 +110,26 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
     }
     async handleTimerUpdate() {
         await this.update();
-        var timerId = setTimeout(this.handleTimerUpdate, this.TIMER_PERIOD);
-        this.setState({timerId: timerId});
+        this.setTimer()
+    }
+
+    setTimer() {
+        this.timerId = setTimeout(this.handleTimerUpdate, this.TIMER_PERIOD);
+    }
+
+    clearTimer() {
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = null;
+        }
     }
 
     handleLiveSwitch() {
         var newIsLive = !this.props.isLive;
         if (newIsLive) {
-            setTimeout(this.handleTimerUpdate, this.TIMER_PERIOD);
+            this.setTimer()
         } else {
-            if (this.state.timerId) clearTimeout(this.state.timerId);
+            
         }
         this.props.setVisualizeState(newIsLive, this.props.isDomainView);
     }
@@ -125,12 +148,14 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
 
     handleCreateRecord(recordUrl: string) {
         this.props.createRecordCallback(recordUrl);
-        this.props.setVisualizeState(true, this.props.isDomainView);
+        // this.props.setVisualizeState(true, this.props.isDomainView);
     }
     render() {
         if (this.state.error) {
             return (<p>Error</p>);
         }
+        console.log("is live", this.props.isLive);
+        var live = this.props.isLive;
         return (
             <>
                 <ul>
@@ -138,7 +163,7 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
                 </ul>
                 <div className="justify-content-md-center">
                     <Form className="m-2">
-                        <Form.Check type="switch" label="Turn on live mode" defaultChecked={this.props.isLive} onChange={this.handleLiveSwitch}/>
+                        <Form.Check type="switch" label="Turn on live mode" defaultChecked={live} onChange={this.handleLiveSwitch}/>
                     </Form>
                     <Form className="m-2">
                         <Form.Check type="switch" label="Show domains only" defaultChecked={this.props.isDomainView} onChange={this.handleDomainSwitch}/>

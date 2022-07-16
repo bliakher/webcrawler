@@ -67,16 +67,19 @@ export class ServiceRest {
         }
     }
 
-    static async createRecord(newRecord: RecordEditable): Promise<boolean> {
+    static async createRecord(newRecord: RecordEditable): Promise<number | null> {
         // return this.testCreate();
         const body = this.transformRecordData(newRecord);
         try {
             const response = await fetch(url + "/records", this.getFetchParamsWithBody('POST', body));
             const parsed = await response.json();
-            return parsed.success;
+            if (parsed.success) {
+                return parseInt(parsed.id);
+            }
+            return null;
         } catch (error) {
             console.log(error);
-            return false;
+            return null;
         }
     }
 

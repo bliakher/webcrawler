@@ -89,7 +89,6 @@ export class GraphTransfom {
             nodes.push(node);
             value.links.forEach(link => {
                 let d3link: D3Link = {source: value.url, target: link.url};
-                if (link.url == "https://www.vysokeskoly.cz/katalog-vs/univerzita-karlova/1-lekarska-fakulta/153") console.log(d3link);
                 links.push(d3link);
             })
             

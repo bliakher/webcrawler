@@ -19,6 +19,7 @@ interface WebRecordsState {
     sortBy: { url: boolean, time: boolean };
     curPage: number;
     checkedRecords: Set<number>;
+    checkNew: boolean;
     showEdit: boolean;
     isNew: boolean;
     editedRecord: RecordData | null;
@@ -41,6 +42,7 @@ export class WebRecords extends React.Component<{}, WebRecordsState> {
             sortBy: { url: false, time: false },
             curPage: 1,
             checkedRecords: new Set(),
+            checkNew: false,
             visualizationDisplayed: false,
             visualizationIsLive: false,
             visualizationIsDomainView: false,
@@ -103,7 +105,12 @@ export class WebRecords extends React.Component<{}, WebRecordsState> {
     async handleEditSave(updatedRecord: RecordEditable, recordId: number) {
         // TODO: show update/create result
         if (this.state.isNew) {
-            await ServiceRest.createRecord(updatedRecord);
+            var id = await ServiceRest.createRecord(updatedRecord);
+            if (this.state.checkNew && id) {
+                // this.setVisualizeState(true, this.state.visualizationIsDomainView);
+                this.setState({checkNew: false, checkedRecords: this.state.checkedRecords.add(id), visualizationIsLive: true, visualizationDisplayed: false})
+                this.setState({visualizationDisplayed: true});
+            }
         } else {
             await ServiceRest.updateRecord(recordId, updatedRecord);
         }
@@ -111,6 +118,11 @@ export class WebRecords extends React.Component<{}, WebRecordsState> {
     }
     async handleDelete(recordId: number) {
         console.log("delete rec: ", recordId);
+        if (this.state.checkedRecords.has(recordId)) {
+            var checked = this.state.checkedRecords;
+            checked.delete(recordId);
+            this.setState({checkedRecords: checked });
+        }
         await ServiceRest.deleteRecord(recordId);
         await this.getData();
     }
@@ -119,6 +131,7 @@ export class WebRecords extends React.Component<{}, WebRecordsState> {
         if (url) {
             emptyRecord.url = url;
             emptyRecord.active = true;
+            this.setState({checkNew: true});
         }
         this.setState({showEdit: true, editedRecord: emptyRecord, isNew: true});
     }
@@ -131,7 +144,7 @@ export class WebRecords extends React.Component<{}, WebRecordsState> {
     }
     handleVisualize() { this.setState({visualizationDisplayed: !this.state.visualizationDisplayed}); }
     setVisualizeState(isLive: boolean, isDomainView: boolean) {
-        console.log("set visualize");
+        // console.log("set visualize");
         this.setState({visualizationIsLive: isLive, visualizationIsDomainView: isDomainView})
     }
 
@@ -214,7 +227,7 @@ export class WebRecords extends React.Component<{}, WebRecordsState> {
     }
 
     renderVisualization() {
-        console.log(this.state.visualizationIsLive);
+        // console.log(this.state.visualizationIsLive);
         if (this.state.checkedRecords.size === 0) return null;
         var button = (
             <Button onClick={this.handleVisualize} className="m-3">
