@@ -1,5 +1,4 @@
 import { INode, Node } from "./model";
-import { data } from "./testData";
 
 const url = "http://nasold.piroutek.eu:4001/graphql";
 
@@ -36,11 +35,5 @@ export class ServiceGraphql {
             return null;
         }
         
-    }
-    
-
-    private static getNodesTest() {
-        var nodes: INode[] = data.data.nodes;
-        return nodes.map(nodeObj => new Node(nodeObj));
     }
 }
