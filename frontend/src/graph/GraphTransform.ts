@@ -38,8 +38,14 @@ export class GraphTransfom {
                     duplicate.owners.push(node.owners[0]); // add owner to list
                     continue;
                 } else {
-                    this.removeAllNodesByLinks(uniqueNodes, duplicate.links, duplicate.owners); // remove all nodes that are linked fromduplicate because we are replacing it
-                    node.owners.push(...duplicate.owners);
+                    // node on hand is newer
+                    if (node.crawlTime === 0 && duplicate.crawlTime !== 0) { // don't replace the node, if the newer not is not crawled
+                        duplicate.owners.push(...node.owners);
+                        continue;
+                    } else {
+                        this.removeAllNodesByLinks(uniqueNodes, duplicate.links, duplicate.owners); // remove all nodes that are linked fromduplicate because we are replacing it
+                        node.owners.push(...duplicate.owners);
+                    }
                 }
             } 
             // if map doesn't have node, or the node is older we change data
