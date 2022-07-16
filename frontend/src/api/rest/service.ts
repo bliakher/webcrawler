@@ -12,7 +12,7 @@ export interface APIResponse<T> {
 var records = testRecords.map(dataObj => new RecordData(dataObj));
 var counter = 7;
 
-const url = "http://nasold.piroutek.eu:4001";
+const url = `http://${process.env.REACT_APP_BACKEND_URL_PORT}`;
 
 export class ServiceRest {
 

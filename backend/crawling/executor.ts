@@ -6,6 +6,7 @@ import { webpage } from "../model/webpage";
 import { Job, scheduledJobs, scheduleJob } from "node-schedule";
 import { crawlerData } from "../model/crawlerData";
 import { map } from "cheerio/lib/api/traversing";
+import e from "express";
 
 export class Executor {
 	private static instance: Executor = null;
@@ -81,9 +82,10 @@ export class Executor {
 	private async startImmidiateExecution(record: webpage, fromPost: boolean) {
 		console.log(`running execution for record ${record.id}`);
 		let exec: execution = await this.logNewExecution(record);
+		console.log(`execution for id ${record.id} was logged as ${exec.id}`);
 		const task = this.pool.queue(async crawler => crawler(record, exec, fromPost));
-		task.then((result: crawlerData) => {
-			this.resolveCrawledGraph(result.nodes, result.record, result.exec);
+		task.then(async (result: crawlerData) => {
+			await this.resolveCrawledGraph(result.nodes, result.record, result.exec);
 
 			if (!result.fromPost) {
 				this.planExecution(record, new Date(Date.now() + (record.periodicity * 60 * 1000)));
@@ -116,19 +118,21 @@ export class Executor {
 		return await this.db.getExecution(execId);
 	}
 
-	private resolveCrawledGraph(nodes: node[], record: webpage, exec: execution) {
+	private async resolveCrawledGraph(nodes: node[], record: webpage, exec: execution) {
 		let db = DatabaseManager.getManager();
-		console.log(nodes);
 		exec.crawledSites = nodes.length;
 		exec.endTime = new Date(Date.now());
 		exec.executionStatus = 2;
-		db.executionUpdate(exec).then((rows) => {
+		console.log(`resolving graph for execution ${exec.id}`);
+		await db.executionUpdate(exec).then((rows) => {
 			if (rows < 1) {
 				console.log(`error updating execution ${exec.id}`);
+			} else {
+				console.log(`execution ${exec.id} was updated`);
 			}
 		});
 
-		db.storeNodeGraph(record, nodes).then(() => {
+		await db.storeNodeGraph(record, nodes).then(() => {
 			console.log(`record ${record.id} graph stored`);
 		}).catch((error) => {
 			console.log(`record ${record.id} graph wasn't updated`, error);

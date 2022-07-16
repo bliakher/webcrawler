@@ -12,8 +12,9 @@ const cheerio = require('cheerio')
 const { performance } = require('perf_hooks');
 
 
-export async function crawl(record: webpage, execution: execution, fromPost : boolean) : Promise<crawlerData> {
+export async function crawl(record: webpage, execution: execution, fromPost: boolean): Promise<crawlerData> {
 	updateExecutionStatus(execution);
+	console.log(`crawler for execution ${execution.id} of record ${record.id} started`);
 
 	const url = record.url
 	const regex = new RegExp(record.regEx)
@@ -29,7 +30,7 @@ export async function crawl(record: webpage, execution: execution, fromPost : bo
 			// console.log('does not match regex')
 			continue
 		}
-		
+
 		const t1 = performance.now()
 
 		const content = await getContent(node.url)
@@ -51,7 +52,7 @@ export async function crawl(record: webpage, execution: execution, fromPost : bo
 				if (await checkContentType(link)) {
 					crawledMap.set(shortLink, nodes.length)
 					node.links.push(nodes.length)
-					nodes.push(<node>{'url': link})
+					nodes.push(<node>{ 'url': link })
 				}
 				else {
 					crawledMap.set(shortLink, -1)
@@ -64,11 +65,14 @@ export async function crawl(record: webpage, execution: execution, fromPost : bo
 		node.crawlTime = Math.floor(t2 - t1);
 	}
 
-	return {nodes : nodes, record : record, exec : execution, fromPost : fromPost};
+	console.log(`crawler for execution ${execution.id} of record ${record} ended`);
+
+
+	return { nodes: nodes, record: record, exec: execution, fromPost: fromPost };
 }
 
 async function checkContentType(url: string) {
-	
+
 	try {
 		const { headers } = await axios.head(url)
 		return headers['content-type'].startsWith('text/html')
@@ -79,7 +83,7 @@ async function checkContentType(url: string) {
 }
 
 async function getContent(url: string) {
-	
+
 	try {
 		const { data } = await axios.get(url)
 		return data
@@ -114,7 +118,7 @@ function shortenUrl(url: string): string {
 		.replace(/\/$/, '')
 }
 
-function updateExecutionStatus(exec : execution) {
+function updateExecutionStatus(exec: execution) {
 	exec.executionStatus = 1;
 	let db = DatabaseManager.getManager();
 	db.executionUpdate(exec);
