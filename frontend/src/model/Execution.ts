@@ -50,7 +50,7 @@ export class ExecutionData {
             case ExecutionStatus.Error:
                 return 'ERROR';
             case ExecutionStatus.Unknown:
-                return 'UNKNOWN';
+                return 'NOT CRAWLED';
         }
     }
 }
