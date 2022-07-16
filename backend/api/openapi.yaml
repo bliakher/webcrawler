@@ -34,12 +34,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_201'
+        "400":
+          description: Invalid data in request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
         "418":
           description: Creation failed.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
       x-swagger-router-controller: Default
   /records/{recID}:
     get:
@@ -66,13 +72,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
         "404":
           description: Record not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
       x-swagger-router-controller: Default
     put:
       summary: Update record with id
@@ -98,19 +104,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_201'
+                $ref: '#/components/schemas/inline_response_200_2'
         "400":
-          description: Invalid ID.
+          description: Invalid ID or request body.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
         "404":
           description: Record not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
       x-swagger-router-controller: Default
     delete:
       summary: Delete record with id
@@ -130,19 +136,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_201'
+                $ref: '#/components/schemas/inline_response_200_2'
         "400":
           description: Invalid ID.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
         "404":
           description: Record not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
       x-swagger-router-controller: Default
   /executions:
     get:
@@ -154,10 +160,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_2'
+                $ref: '#/components/schemas/inline_response_200_3'
       x-swagger-router-controller: Default
     post:
-      summary: Create new execution without values
+      summary: Start immidiate execution for given record
       operationId: createExecution
       requestBody:
         content:
@@ -171,13 +177,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_201'
+                $ref: '#/components/schemas/inline_response_200_2'
         "418":
           description: Creation failed.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
       x-swagger-router-controller: Default
   /executions/{execID}:
     get:
@@ -198,19 +204,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_3'
+                $ref: '#/components/schemas/inline_response_200_4'
         "400":
           description: Invalid ID.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
         "404":
           description: Execution not found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_418'
+                $ref: '#/components/schemas/inline_response_400'
       x-swagger-router-controller: Default
 components:
   schemas:
@@ -232,9 +238,10 @@ components:
               regEx:
                 type: string
               periodicity:
-                type: string
-              label:
                 type: integer
+                format: int64
+              label:
+                type: string
               active:
                 type: boolean
               tags:
@@ -245,43 +252,42 @@ components:
                 type: string
               lastExecStatus:
                 type: integer
-                format: int64
             example:
               regEx: regEx
-              lastExecution: lastExecution
-              executionStatus: 6
-              periodicity: periodicity
+              periodicity: 6
               active: true
               id: 0
               label: label
               url: url
+              lastExecTime: lastExecTime
               tags:
               - tags
               - tags
+              lastExecStatus: 1
       example:
         records:
         - regEx: regEx
-          lastExecution: lastExecution
-          executionStatus: 6
-          periodicity: periodicity
+          periodicity: 6
           active: true
           id: 0
           label: label
           url: url
+          lastExecTime: lastExecTime
           tags:
           - tags
           - tags
+          lastExecStatus: 1
         - regEx: regEx
-          lastExecution: lastExecution
-          executionStatus: 6
-          periodicity: periodicity
+          periodicity: 6
           active: true
           id: 0
           label: label
           url: url
+          lastExecTime: lastExecTime
           tags:
           - tags
           - tags
+          lastExecStatus: 1
         success: true
     records_body:
       required:
@@ -294,6 +300,7 @@ components:
           type: string
         periodicity:
           type: integer
+          format: int64
         label:
           type: string
         active:
@@ -307,12 +314,16 @@ components:
       properties:
         success:
           type: boolean
+        id:
+          type: integer
+          format: int64
         message:
           type: string
       example:
         success: true
+        id: 0
         message: message
-    inline_response_418:
+    inline_response_400:
       type: object
       properties:
         success:
@@ -335,7 +346,8 @@ components:
             regEx:
               type: string
             periodicity:
-              type: string
+              type: integer
+              format: int64
             label:
               type: string
             active:
@@ -348,33 +360,32 @@ components:
               type: string
             lastExecStatus:
               type: integer
-              format: int64
           example:
             regEx: regEx
-            lastExecution: lastExecution
-            executionStatus: 6
-            periodicity: periodicity
+            periodicity: 6
             active: true
             id: 0
             label: label
             url: url
+            lastExecTime: lastExecTime
             tags:
             - tags
             - tags
+            lastExecStatus: 1
       example:
         success: true
         record:
           regEx: regEx
-          lastExecution: lastExecution
-          executionStatus: 6
-          periodicity: periodicity
+          periodicity: 6
           active: true
           id: 0
           label: label
           url: url
+          lastExecTime: lastExecTime
           tags:
           - tags
           - tags
+          lastExecStatus: 1
     records_recID_body:
       required:
       - regEx
@@ -385,7 +396,7 @@ components:
         regEx:
           type: string
         periodicity:
-          type: integer
+          type: string
         label:
           type: string
         active:
@@ -395,6 +406,16 @@ components:
           items:
             type: string
     inline_response_200_2:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      example:
+        success: true
+        message: message
+    inline_response_200_3:
       type: object
       properties:
         success:
@@ -450,12 +471,12 @@ components:
         recordId:
           type: integer
           format: int64
-    inline_response_200_3:
+    inline_response_200_4:
       type: object
       properties:
         success:
           type: boolean
-        exeuction:
+        execution:
           type: object
           properties:
             id:
@@ -474,11 +495,19 @@ components:
             crawledSites:
               type: integer
               format: int64
+          example:
+            executionStatus: 1
+            startTime: startTime
+            id: 0
+            endTime: endTime
+            crawledSites: 5
+            recId: 6
       example:
+        execution:
+          executionStatus: 1
+          startTime: startTime
+          id: 0
+          endTime: endTime
+          crawledSites: 5
+          recId: 6
         success: true
-        executionStatus: 1
-        startTime: startTime
-        id: 0
-        endTime: endTime
-        crawledSites: 5
-        recId: 6

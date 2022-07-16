@@ -47,6 +47,7 @@ exports.createRecord = function (body) {
 			let insertedSite = await db.createWebsite(page);
 			examples['application/json'] = {
 				"success": true,
+				"id" : insertedSite.id,
 				"message": "successfully created"
 			};
 			if (insertedSite.id > 0) {
