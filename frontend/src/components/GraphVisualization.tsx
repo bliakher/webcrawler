@@ -154,7 +154,7 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
         if (this.state.error) {
             return (<p>Error</p>);
         }
-        console.log("is live", this.props.isLive);
+        // console.log("is live", this.props.isLive);
         var live = this.props.isLive;
         return (
             <>
