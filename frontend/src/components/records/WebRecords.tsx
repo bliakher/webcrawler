@@ -109,7 +109,6 @@ export class WebRecords extends React.Component<{}, WebRecordsState> {
             if (this.state.checkNew && id) {
                 // this.setVisualizeState(true, this.state.visualizationIsDomainView);
                 this.setState({checkNew: false, checkedRecords: this.state.checkedRecords.add(id), visualizationIsLive: true, visualizationDisplayed: false})
-                this.setState({visualizationDisplayed: true});
             }
         } else {
             await ServiceRest.updateRecord(recordId, updatedRecord);
