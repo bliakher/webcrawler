@@ -39,7 +39,7 @@ export class GraphTransfom {
                     continue;
                 } else {
                     // node on hand is newer
-                    if (node.crawlTime === 0 && duplicate.crawlTime !== 0) { // don't replace the node, if the newer not is not crawled
+                    if (node.crawlTime === 0 && duplicate.crawlTime !== 0) { // don't replace the node, if the newer node is not crawled
                         duplicate.owners.push(...node.owners);
                         continue;
                     } else {
