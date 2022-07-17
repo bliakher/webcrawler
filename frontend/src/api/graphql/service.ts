@@ -1,7 +1,6 @@
 import { INode, Node } from "./model";
-import { data } from "./testData";
 
-const url = "http://nasold.piroutek.eu:4001/graphql";
+const url = `http://${process.env.REACT_APP_BACKEND_URL_PORT}/graphql`;
 
 export class ServiceGraphql {
 
@@ -30,17 +29,12 @@ export class ServiceGraphql {
             var parsed = await response.json();
             if (!parsed) return null;
             var inodes: INode[] = parsed.data.nodes;
+			console.log(inodes);
             return inodes.map(nodeObj => new Node(nodeObj));
         } catch(error) {
             console.log(error);
             return null;
         }
         
-    }
-    
-
-    private static getNodesTest() {
-        var nodes: INode[] = data.data.nodes;
-        return nodes.map(nodeObj => new Node(nodeObj));
     }
 }

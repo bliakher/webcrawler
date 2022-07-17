@@ -24,7 +24,8 @@ var openApiApp = expressAppConfig.getApp();
 //let executor = Executor.getExecutor();
 
 var app = express()
-app.use(/.*/, cors());
+app.use(cors());
+app.options('*', cors());
 app.use('/graphql', graphqlHTTP({
     schema: schema,
     graphiql: true,

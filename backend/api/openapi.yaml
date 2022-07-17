@@ -396,7 +396,8 @@ components:
         regEx:
           type: string
         periodicity:
-          type: string
+          type: integer 
+          format: int64
         label:
           type: string
         active:
