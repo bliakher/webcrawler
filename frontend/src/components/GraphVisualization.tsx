@@ -127,9 +127,9 @@ export class GraphVisualization extends React.Component<VisualizationProps, Visu
     handleLiveSwitch() {
         var newIsLive = !this.props.isLive;
         if (newIsLive) {
-            this.setTimer()
+            this.setTimer();
         } else {
-            
+            this.clearTimer();
         }
         this.props.setVisualizeState(newIsLive, this.props.isDomainView);
     }
