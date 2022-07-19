@@ -29,7 +29,7 @@ export class ServiceGraphql {
             var parsed = await response.json();
             if (!parsed) return null;
             var inodes: INode[] = parsed.data.nodes;
-			console.log(inodes);
+			// console.log(inodes);
             return inodes.map(nodeObj => new Node(nodeObj));
         } catch(error) {
             console.log(error);
