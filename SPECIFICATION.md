@@ -33,7 +33,7 @@ Use page title or URL, in given order of preference, as a node label. In domain 
 ### API
 
 The website record and execution CRUD must be exposed using HTTP-based API documented using OpenAPI / Swagger. Crawled data of all website records can be queried using GraphQL. The GraphQL model will be announced later. The GraphQL model must "implement" the following schema:
-
+```
 type Query{
     websites: [WebPage!]!
     nodes(webPages: [ID!]): [Node!]!
@@ -55,6 +55,7 @@ type Node{
     links: [Node!]!
     owner: WebPage!
 }
+```
 
 ### Deployment
 
