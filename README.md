@@ -1,6 +1,6 @@
 # WebCrawler
 
-Project for Advanced Technologies for Web Applications course at MFF UK. [Specification](/SPECIFICATION.md)
+Project for Advanced Technologies for Web Applications course at MFF UK. [Specification](/SPECIFICATION.md).
 
 ## Deployment
 
